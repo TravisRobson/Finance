@@ -11,7 +11,6 @@ from argparse import ArgumentParser
 class Options:
   """Process the command line options"""
   def __init__(self):
-
     description = 'Execute the Finance application'
     self.parser = ArgumentParser(prog='finance', usage='./bin/%(prog)s [options]', description=description)
 
