@@ -1,2 +1,2 @@
 1.0 -- beta
-    [#1] -- Initial unit test created
+    [#1] -- Initial unit test created.
