@@ -13,5 +13,6 @@ To run tests
 ```bash
 pytest -v # i.e. verbose
 ```
-[![Travis Build](https://img.shields.io/travis/TravisRobson/Finance)](https://github.com/TravisRobson/Finance)
+
+![Python application](https://github.com/TravisRobson/Finance/workflows/Python%20application/badge.svg?branch=master&event=push)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
