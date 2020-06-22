@@ -1,4 +1,5 @@
 etc/loans.csv
+myvenv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
