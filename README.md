@@ -15,6 +15,9 @@ pytest -v # i.e. verbose
 ```
 
 
+## Issues
+[![Issues](https://img.shields.io/github/issues-raw/tterb/PlayMusic.svg?maxAge=25000)](https://github.com/tterb/Hyde/issues)  
+
 
 ## Licesnse
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
