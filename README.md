@@ -16,7 +16,7 @@ pytest -v # i.e. verbose
 
 
 ## Issues
-[![Issues](https://img.shields.io/github/issues-raw/tterb/PlayMusic.svg?maxAge=25000)](https://github.com/tterb/Hyde/issues)  
+[![Issues](https://img.shields.io/github/issues-raw/tterb/PlayMusic.svg?maxAge=25000)](https://github.com/TravisRobson/Finance/issues)  
 
 
 ## Licesnse
