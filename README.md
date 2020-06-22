@@ -13,6 +13,5 @@ To run tests
 ```bash
 pytest -v # i.e. verbose
 ```
-
-## License--GPL v3
+![Travis Build](https://img.shields.io/travis/TravisRobson/Finance)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
