@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-
-Author  Travis Robson
-"""
 
 
 from .process import Process # \todo need to figure out why I must prepend . to module names
@@ -25,3 +21,5 @@ class Finance:
     class that can run subprocesses
     """
     return self.process.run("ls etc/*.csv" ).decode('utf-8') 
+
+  
