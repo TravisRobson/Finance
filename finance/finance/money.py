@@ -33,7 +33,17 @@ class Money:
 
     
   def __add__(self, rhs):
-    return Money(amount=self._amount + rhs.amount)
+    if isinstance(rhs, Money):
+      return Money(amount=self._amount + rhs.amount)
+    else:
+      return Money(amount=self._amount + Decimal(rhs))
+
+    
+  def __sub__(self, rhs):
+    if isinstance(rhs, Money):
+      return Money(amount=self._amount - rhs.amount)
+    else:
+      return Money(amount=self._amount - Decimal(rhs))
 
 
   def __pos__(self, rhs):
@@ -42,3 +52,45 @@ class Money:
 
   def __neg__(self, rhs):
     return Money(amount=-self._amount)
+
+
+  def __mul__(self, rhs):
+    return Money(amount=Decimal(rhs)*self._amount) 
+
+
+  def __truediv__(self, rhs):
+    return Money(amount=self._amount/Decimal(rhs))
+
+
+  __radd__ = __add__ # commutative
+  __rmul__ = __mul__ # commutative
+
+
+  # Comparison operator
+  def __lt__(self, rhs):
+    if isinstance(rhs, Money):
+      return self._amount < rhs._amount
+    else:
+      return self < Money(rhs)
+
+
+  def __le__(self, rhs):
+
+
+  def __gt__(self, rhs):
+    if isinstance(rhs, Money):
+      return self._amount > rhs._amount
+    else:
+      return self > Money(rhs)
+
+
+  def __ge__(self, rhs):
+
+
+  def __eq__(self, rhs):
+
+
+
+
+
+
