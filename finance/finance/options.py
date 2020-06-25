@@ -11,6 +11,7 @@ from argparse import ArgumentParser
 class Options:
   """Process the command line options"""
   def __init__(self):
+    """Create parser and define command line arguments"""
     description = 'Execute the Finance application'
     self.parser = ArgumentParser(prog='finance', usage='./bin/%(prog)s [options]', description=description)
 
@@ -18,6 +19,7 @@ class Options:
 
     self.parser.add_argument('-l', '--log-level', help='Application logging level')
     self.parser.add_argument('-s', '--save-figure', help='Save Matplotlib figures')
+
 
   def parse(self, args=None):
     """Parse known options, uknown options are ignored"""

@@ -2,35 +2,28 @@
 
 
 import sys
+from logging import basicConfig, getLogger, DEBUG
 
-from src import Options
-from src import Finance
-from src import LoanReader
+from finance import Finance
+from finance import Options
+
 
 def main(args):
-  """Finance executable"""
+  """
+  Finance executable
+  """
   print('Welcome to Finance')
+
+  logger = getLogger(__name__)
 
   options = Options()
   options.parse(args[1:])
 
+  basicConfig(filename='finance.log', level=DEBUG)
+
   finance = Finance(options)
 
-  print(f"CSV files: {finance.list_csv_files()}")
-
-  loan_reader = LoanReader('etc/loans.csv')
-
-  loan_data = loan_reader.read()
-
-  # \todo need something to validate the data
-
-  total = 0.0
-  for loan in loan_data:
-    for key, value in loan.items():
-      if key.strip() == 'balance':
-        total += float(value)
-
-  print(f'Total balance ${total}')
+  finance.run()
 
 
 if __name__ == '__main__':
