@@ -16,10 +16,10 @@ class LoanReader:
 
     # \todo need some error checking here for an invalid file
     with open(self._filename, 'rt') as file:
-      reader = csv.DictReader(file) 
+      header = [h.strip() for h in file.readline().split(',')]
+      reader = csv.DictReader(file, fieldnames=header) 
 
       for row in reader:
-        print(row)
         self._loans.append(row)
 
     return self._loans

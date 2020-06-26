@@ -5,6 +5,7 @@ from logging import getLogger
 from .process import Process # \todo need to figure out why I must prepend . to module names
 from .loanreader import LoanReader
 from .money import Money
+from .loan import Loan, LoanStatus
 
 class Finance:
 
@@ -30,7 +31,7 @@ class Finance:
   def run(self):
     """
     """
-    print(f"CSV files: {self.list_csv_files()}")
+    #print(f"CSV files: {self.list_csv_files()}")
 
     loan_reader = LoanReader('etc/loans.csv')
 
@@ -46,5 +47,32 @@ class Finance:
           total += float(value)
 
     print(f'Total balance ${total}')
+
+    first_loan = loan_data[1]
+
+    balance = Money(first_loan['balance'].strip())
+    interest = first_loan['interest rate'].strip()
+    bill_day_of_month = first_loan['bill date'].strip()
+    pay_day_of_month = first_loan['pay date'].strip()
+    status_str = first_loan['status'].strip()
+    if status_str == 'in progress':
+      status = LoanStatus.IN_PROGRESS
+    elif status_str == 'forbearance':
+      status = LoanStatus.FORBEARANCE
+    elif status_str == 'deferred':
+      status = LoanStatus.DEFERRED
+    else:
+      raise Exception("Invalid loan status")
+
+    loan = Loan(balance, interest, bill_day_of_month, pay_day_of_month, status)
+
+    print(loan)
+
+
+
+
+
+
+
 
   
