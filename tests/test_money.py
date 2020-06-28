@@ -6,12 +6,7 @@ from unittest import TestCase
 
 import pytest
 
-from finance.finance.money import Money
-
-def almost_equal(a, b):
-  assert isinstance(a, Money)
-  assert isinstance(b, Money)
-  return abs(a - b) < 1.0e-3
+from finance.finance.money import Money, almost_equal
 
 
 @pytest.mark.parametrize("first, second, expected", [
@@ -72,9 +67,11 @@ class MoneyTestCase(TestCase):
 
 
   def test_mul(self):
-    a = Money(3.33)
+    a = Money(2.20)
     b = 4 * a
-    self.assertAlmostEqual(b, Money(13.32))
+    self.assertAlmostEqual(b, Money(8.80))
+    c = 0.1 * a
+    self.assertAlmostEqual(c, Money(0.22))
 
 
   def test_div(self):

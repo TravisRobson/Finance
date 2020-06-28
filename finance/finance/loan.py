@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-from enum import Enum
+import enum
+import calendar
+import decimal
 
 from .money import Money
 
 
-class LoanStatus(Enum):
+class LoanStatus(enum.Enum):
   IN_PROGRESS = 1
   DEFERRED = 2
   FORBEARANCE = 3
@@ -66,14 +68,14 @@ class Loan:
 
   def __str__(self):
     msg = (
-      f"${self._balance}, {self._interest}%,"
+      f"${self._balance}, {self._interest}%, ${self._accrued_interest}"
       f"bill day: {self._bill_day_of_month},"
       f"pay day: {self._pay_day_of_month}, {self._status}"
     )
     return msg
  
   def __repr__(self):
-    return f"{self._balance}, {self._interest}, {self._bill_day_of_month}, {self._pay_day_of_month}, {self._status}"
+    return f"{self._balance}, {self._interest}, {self._accrued_interest}, {self._bill_day_of_month}, {self._pay_day_of_month}, {self._status}"
 
   @property
   def balance(self):
@@ -92,11 +94,17 @@ class Loan:
     if not 1 <= int(day) <= 28: 
       raise InvalidDayOfMonth(day)
 
-  def accrue_daily(self, date):
+  def accrue_daily(self, year) -> None:
     # get current month from date
-    daily_interest_rate = self._interest / 100.00
+    if self._status != LoanStatus.FORBEARANCE:
+      num_days_in_year = 365
+      if calendar.isleap(year):
+        num_days_in_year = 366
 
-  def apply_money(self, amount):
+      daily_interest_rate = decimal.Decimal(self._interest / 100.00 / num_days_in_year)
+      self._accrued_interest += self._balance * daily_interest_rate 
+
+  def apply_money(self, amount) -> None:
     """
     It is the reponsibility of the user to not attempt to pay more 
     than what is owed.
@@ -104,22 +112,24 @@ class Loan:
     if amount > self.total_owed:
       raise ExcessivePayment(self._balance, self._accrued_interest, amount)
     else:
+      # you must pay on accrued interest first
       leftover = self._apply_to_accrued(amount)
-      print(leftover)
       if self._accrued_interest > 0.0: # i.e. still interest left to pay
         return
       else:
         self._balance -= leftover
 
-  def _apply_to_accrued(self, amount):
+  def _apply_to_accrued(self, amount) -> None:
     if amount <= self._accrued_interest:
-      print(amount)
-      print(self._accrued_interest)
       self._accrued_interest -= amount
       return Money(0.00)
     else:
       self._accrued_interest = Money(0.00)
       return amount - self._accrued_interest
+
+
+  def convert_accrued_to_principal(self):
+    pass
     
 
 

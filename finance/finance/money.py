@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 
 
+from random import uniform
+import pytest
+
 from decimal import Decimal, ROUND_HALF_UP
 
+
+def almost_equal(a, b):
+  assert isinstance(a, Money)
+  assert isinstance(b, Money)
+  return abs(a - b) < 1.0e-3
+  
 
 class Money:
 
@@ -25,7 +34,7 @@ class Money:
 
 
   def __str__(self):
-    return f"{self._amount:.2f}"
+    return f"${self._amount}"
 
 
   def __repr__(self):
@@ -65,7 +74,7 @@ class Money:
 
 
   def __mul__(self, rhs):
-    return Money(amount = Decimal(rhs)*self._amount) 
+    return Money(amount = Decimal(rhs) * self._amount)
 
 
   def __truediv__(self, rhs):
