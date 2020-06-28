@@ -85,6 +85,11 @@ class Loan:
   def total_owed(self):
     return self._balance + self._accrued_interest
   
+  @property
+  def bill_day_of_month(self):
+    return self._bill_day_of_month
+  
+
 
   def validate_day_of_month(self, day):
     """
