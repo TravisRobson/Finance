@@ -4,7 +4,22 @@
 from decimal import Decimal
 from unittest import TestCase
 
+import pytest
+
 from finance.finance.money import Money
+
+def almost_equal(a, b):
+  assert isinstance(a, Money)
+  assert isinstance(b, Money)
+  return abs(a - b) < 1.0e-3
+
+
+@pytest.mark.parametrize("first, second, expected", [
+  (Money(1.23), Money(1.00), Money(2.23)),
+  (Money(-4.45), Money(2.34), Money(-2.11))
+])
+def test_add(first, second, expected):
+  assert almost_equal(first + second, expected)
 
 
 class MoneyTestCase(TestCase):

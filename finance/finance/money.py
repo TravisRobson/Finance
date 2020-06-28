@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from decimal import Decimal, ROUND_HALF_UP, localcontext
+from decimal import Decimal, ROUND_HALF_UP
 
 
 class Money:
@@ -9,7 +9,7 @@ class Money:
 
   def __init__(self, amount=None):
     if isinstance(amount, Decimal):
-      self._amount = amount
+      self._amount = amount or 0
     else:
       self._amount = Decimal(amount or 0)
 
@@ -25,7 +25,7 @@ class Money:
 
 
   def __str__(self):
-    return f"{self._amount}"
+    return f"{self._amount:.2f}"
 
 
   def __repr__(self):
@@ -86,9 +86,9 @@ class Money:
 
   def __le__(self, rhs):
     if isinstance(rhs, Money):
-      return self._amount >= rhs._amount
+      return self._amount <= rhs._amount
     else:
-      return self >= Money(rhs)   
+      return self <= Money(rhs)   
 
 
   def __gt__(self, rhs):

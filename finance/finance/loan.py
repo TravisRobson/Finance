@@ -10,34 +10,6 @@ class LoanStatus(Enum):
   DEFERRED = 2
   FORBEARANCE = 3
 
-
-class Loan:
-
-  def __init__(self, balance, interest, bill_day_of_month, pay_day_of_month, status):
-    if balance < 0.0:
-      raise NegativeLoanBalance()
-    if not 1 < int(bill_day_of_month) < 28: # \todo is it really 28 ya think?
-      raise InvalidDayOfMonth(bill_day_of_month)
-    if not 1 < int(pay_day_of_month) < 28: 
-      raise InvalidDayOfMonth(pay_day_of_month)
-
-    self._balance = balance.__round__(2)
-    self._interest = interest # APR
-    self._bill_day_of_month = int(bill_day_of_month)
-    self._pay_day_of_month = int(pay_day_of_month)
-    self._status = status
-
-  def __str__(self):
-    return f"${self._balance}, {self._interest}%, bill day: {self._bill_day_of_month}, pay day: {self._pay_day_of_month}, {self._status}"
- 
-  def __repr__(self):
-    return f"{self._balance}, {self._interest}, {self._bill_day_of_month}, {self._pay_day_of_month}, {self._status}"
-
-  @property
-  def balance(self):
-    return self._balance
-
-  
 class InvalidDayOfMonth(Exception):
 
   def __init__(self, value):
@@ -47,9 +19,112 @@ class InvalidDayOfMonth(Exception):
     return f"value ({self._value})"
 
 
-class NegativeLoanBalance(Exception):
-  def __init__(self):
-    pass
+class InvalidLoanBalance(Exception):
+
+  def __init__(self, amount):
+    self._amount = amount
+
+  def __str__(self):
+    return f"amount ${self._amount}, must be > $0.00"
+
+
+class ExcessivePayment(Exception):
+
+  def __init__(self, balance, accrued, amount):
+    self._balance = balance
+    self._accrued = accrued
+    self._amount = amount
+
+  def __str__(self):
+    msg = (
+      f"Amounted to pay ${self._amount} on loan "
+      f"with balance ${self._balance}, "
+      f"and accrued interest ${self._accrued}"
+    )
+    return msg
+
+
+class Loan:
+
+  def __init__(self, balance, interest, bill_day_of_month, pay_day_of_month, status=LoanStatus.IN_PROGRESS):
+    """
+    Interest rate is APR, assumed to be a percentage.
+    """
+    # validate
+    if not balance > 0.0:
+      raise InvalidLoanBalance(balance)
+    self.validate_day_of_month(bill_day_of_month)
+    self.validate_day_of_month(pay_day_of_month)
+
+    # set values
+    self._balance = balance.__round__(2)
+    self._interest = interest # APR
+    self._bill_day_of_month = int(bill_day_of_month)
+    self._pay_day_of_month = int(pay_day_of_month)
+    self._status = status
+    self._accrued_interest = Money(0.00)
+
+  def __str__(self):
+    msg = (
+      f"${self._balance}, {self._interest}%,"
+      f"bill day: {self._bill_day_of_month},"
+      f"pay day: {self._pay_day_of_month}, {self._status}"
+    )
+    return msg
+ 
+  def __repr__(self):
+    return f"{self._balance}, {self._interest}, {self._bill_day_of_month}, {self._pay_day_of_month}, {self._status}"
+
+  @property
+  def balance(self):
+    return self._balance
+
+  @property
+  def total_owed(self):
+    return self._balance + self._accrued_interest
+  
+
+  def validate_day_of_month(self, day):
+    """
+    Max of 28 because you can't have a recurring date which doesn't fall
+    within a non-leap year February.
+    """
+    if not 1 <= int(day) <= 28: 
+      raise InvalidDayOfMonth(day)
+
+  def accrue_daily(self, date):
+    # get current month from date
+    daily_interest_rate = self._interest / 100.00
+
+  def apply_money(self, amount):
+    """
+    It is the reponsibility of the user to not attempt to pay more 
+    than what is owed.
+    """
+    if amount > self.total_owed:
+      raise ExcessivePayment(self._balance, self._accrued_interest, amount)
+    else:
+      leftover = self._apply_to_accrued(amount)
+      print(leftover)
+      if self._accrued_interest > 0.0: # i.e. still interest left to pay
+        return
+      else:
+        self._balance -= leftover
+
+  def _apply_to_accrued(self, amount):
+    if amount <= self._accrued_interest:
+      print(amount)
+      print(self._accrued_interest)
+      self._accrued_interest -= amount
+      return Money(0.00)
+    else:
+      self._accrued_interest = Money(0.00)
+      return amount - self._accrued_interest
+    
+
+
+  
+
 
 
 
