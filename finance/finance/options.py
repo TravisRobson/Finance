@@ -18,7 +18,9 @@ class Options:
     self.parser.version = '0.1'
 
     self.parser.add_argument('-l', '--log-level', help='Application logging level')
-    self.parser.add_argument('-s', '--save-figure', help='Save Matplotlib figures')
+    self.parser.add_argument('-n', '--num-days', type=int, default=100, help='Number of days to simulate')
+    self.parser.add_argument('-e', '--end-date', type=str, default='', help='End date of simulation')
+    self.parser.add_argument('-d', '--disable-figure', action='store_true', help='Do not display Matplotlib images')
 
 
   def parse(self, args=None):

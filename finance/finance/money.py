@@ -34,11 +34,14 @@ class Money:
 
 
   def __str__(self):
-    return f"${self._amount}"
+    return f"${self._amount:.2f}"
 
 
   def __repr__(self):
-    return str(self)
+    return f"${self._amount}"
+
+  def __float__(self):
+    return float(self._amount)
 
     
   def __add__(self, rhs):

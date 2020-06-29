@@ -25,7 +25,7 @@ def test_init_raise_exception_invalid_balance(balance):
 @pytest.fixture
 def zero_accured_loan():
   """Return a loan with zero accrued interest with 1% interest rate (APR)"""
-  return Loan(Money(100.00), interest=1.00, bill_day_of_month=1, pay_day_of_month=1)
+  return Loan(Money(100.00), interest=1.00, bill_day=1, pay_day=1)
 
 
 @pytest.mark.parametrize("amount, expected", [
@@ -51,3 +51,16 @@ def test_daily_accrued(zero_accured_loan, num_days):
   assert almost_equal(zero_accured_loan.total_owed, Money(100.00 + num_days / 365))
 
 
+@pytest.mark.parametrize("num_days", [randint(0, 100) for i in range(10)])
+def test_convert_accrued_to_principal(zero_accured_loan, num_days):
+  """
+  If you accumulate interest for a few days, check total_owed, and then
+  convert accrued interest to principal, total_owed should be constant, 
+  and equal the balance
+  """
+  for i in range(num_days):
+    zero_accured_loan.accrue_daily(2024)
+  total_owed = zero_accured_loan.total_owed
+  zero_accured_loan.convert_accrued_to_principal()
+  assert total_owed == zero_accured_loan.total_owed
+  assert total_owed == zero_accured_loan.balance

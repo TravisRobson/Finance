@@ -7,4 +7,4 @@ root_dir="$(cd ${dir}/.. > /dev/null 2>&1 && pwd)"
 
 export PYTHONPATH=$PYTHONPATH:${root_dir}/finance
 
-python3 ${root_dir}/finance/__main__.py $@
+python3 ${root_dir}/finance/__main__.py "$@"

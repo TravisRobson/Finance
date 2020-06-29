@@ -8,9 +8,9 @@ from .money import Money
 
 
 class LoanStatus(enum.Enum):
-  IN_PROGRESS = 1
-  DEFERRED = 2
-  FORBEARANCE = 3
+  IN_PROGRESS = 1 # \todo I don't think the following usage of the terms is right or consistent between loans
+  DEFERRED = 2 # I intended this to be interest is accruing, but payments don't need to be made
+  FORBEARANCE = 3 # I intended this to be no payments, no accruing
 
 class InvalidDayOfMonth(Exception):
 
@@ -27,7 +27,14 @@ class InvalidLoanBalance(Exception):
     self._amount = amount
 
   def __str__(self):
-    return f"amount ${self._amount}, must be > $0.00"
+    return f"amount {self._amount}, must be > $0.00"
+
+
+class InvalidLoanStatus(Exception):
+  def __init__(self, status):
+    self._status = status
+  def __str__(self):
+    return f"Invalid loan status read ({self._status})"
 
 
 class ExcessivePayment(Exception):
@@ -39,43 +46,47 @@ class ExcessivePayment(Exception):
 
   def __str__(self):
     msg = (
-      f"Amounted to pay ${self._amount} on loan "
-      f"with balance ${self._balance}, "
-      f"and accrued interest ${self._accrued}"
+      f"Amounted to pay {self._amount} on loan "
+      f"with balance {self._balance}, "
+      f"and accrued interest {self._accrued}"
     )
     return msg
 
 
-class Loan:
+class Loan: # \todo perhaps name SimpleDailyLoan
 
-  def __init__(self, balance, interest, bill_day_of_month, pay_day_of_month, status=LoanStatus.IN_PROGRESS):
+  def __init__(self, balance, interest, bill_day, pay_day, status=LoanStatus.IN_PROGRESS):
     """
     Interest rate is APR, assumed to be a percentage.
+
+    I am going to assume simple daily interest loan
     """
     # validate
     if not balance > 0.0:
       raise InvalidLoanBalance(balance)
-    self.validate_day_of_month(bill_day_of_month)
-    self.validate_day_of_month(pay_day_of_month)
+    self.validate_day_of_month(bill_day)
+    self.validate_day_of_month(pay_day)
 
     # set values
+    if not isinstance(balance, Money):
+      balance = Money(balance)
     self._balance = balance.__round__(2)
     self._interest = interest # APR
-    self._bill_day_of_month = int(bill_day_of_month)
-    self._pay_day_of_month = int(pay_day_of_month)
+    self._bill_day = int(bill_day)
+    self._pay_day = int(pay_day)
     self._status = status
     self._accrued_interest = Money(0.00)
 
   def __str__(self):
     msg = (
-      f"${self._balance}, {self._interest}%, ${self._accrued_interest}"
-      f"bill day: {self._bill_day_of_month},"
-      f"pay day: {self._pay_day_of_month}, {self._status}"
+      f"{self._balance}, {self._interest}%, {self._accrued_interest}, "
+      f"bill day: {self._bill_day}, "
+      f"pay day: {self._pay_day}, {self._status}"
     )
     return msg
  
   def __repr__(self):
-    return f"{self._balance}, {self._interest}, {self._accrued_interest}, {self._bill_day_of_month}, {self._pay_day_of_month}, {self._status}"
+    return f"{self._balance}, {self._interest}, {self._accrued_interest}, {self._bill_day}, {self._pay_day}, {self._status}"
 
   @property
   def balance(self):
@@ -86,10 +97,13 @@ class Loan:
     return self._balance + self._accrued_interest
   
   @property
-  def bill_day_of_month(self):
-    return self._bill_day_of_month
-  
+  def bill_day(self):
+    return self._bill_day
 
+  @property
+  def pay_day(self):
+    return self._pay_day
+  
 
   def validate_day_of_month(self, day):
     """
@@ -107,7 +121,8 @@ class Loan:
         num_days_in_year = 366
 
       daily_interest_rate = decimal.Decimal(self._interest / 100.00 / num_days_in_year)
-      self._accrued_interest += self._balance * daily_interest_rate 
+      print(type(self._balance))
+      self._accrued_interest += daily_interest_rate * self._balance 
 
   def apply_money(self, amount) -> None:
     """
@@ -133,13 +148,6 @@ class Loan:
       return amount - self._accrued_interest
 
 
-  def convert_accrued_to_principal(self):
-    pass
-    
-
-
-  
-
-
-
-
+  def convert_accrued_to_principal(self) -> None:
+    self._balance += self._accrued_interest
+    self._accrued_interest = Money()
