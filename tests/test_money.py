@@ -4,7 +4,17 @@
 from decimal import Decimal
 from unittest import TestCase
 
-from finance.finance.money import Money
+import pytest
+
+from finance.finance.money import Money, almost_equal
+
+
+@pytest.mark.parametrize("first, second, expected", [
+  (Money(1.23), Money(1.00), Money(2.23)),
+  (Money(-4.45), Money(2.34), Money(-2.11))
+])
+def test_add(first, second, expected):
+  assert almost_equal(first + second, expected)
 
 
 class MoneyTestCase(TestCase):
@@ -57,9 +67,11 @@ class MoneyTestCase(TestCase):
 
 
   def test_mul(self):
-    a = Money(3.33)
+    a = Money(2.20)
     b = 4 * a
-    self.assertAlmostEqual(b, Money(13.32))
+    self.assertAlmostEqual(b, Money(8.80))
+    c = 0.1 * a
+    self.assertAlmostEqual(c, Money(0.22))
 
 
   def test_div(self):

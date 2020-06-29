@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 
 
-from decimal import Decimal, ROUND_HALF_UP, localcontext
+from random import uniform
+import pytest
 
+from decimal import Decimal, ROUND_HALF_UP
+
+
+def almost_equal(a, b):
+  assert isinstance(a, Money)
+  assert isinstance(b, Money)
+  return abs(a - b) < 1.0e-3
+  
 
 class Money:
 
 
   def __init__(self, amount=None):
     if isinstance(amount, Decimal):
-      self._amount = amount
+      self._amount = amount or 0
     else:
       self._amount = Decimal(amount or 0)
 
@@ -25,11 +34,14 @@ class Money:
 
 
   def __str__(self):
-    return f"{self._amount}"
+    return f"${self._amount:.2f}"
 
 
   def __repr__(self):
-    return str(self)
+    return f"${self._amount}"
+
+  def __float__(self):
+    return float(self._amount)
 
     
   def __add__(self, rhs):
@@ -65,7 +77,7 @@ class Money:
 
 
   def __mul__(self, rhs):
-    return Money(amount = Decimal(rhs)*self._amount) 
+    return Money(amount = Decimal(rhs) * self._amount)
 
 
   def __truediv__(self, rhs):
@@ -86,9 +98,9 @@ class Money:
 
   def __le__(self, rhs):
     if isinstance(rhs, Money):
-      return self._amount >= rhs._amount
+      return self._amount <= rhs._amount
     else:
-      return self >= Money(rhs)   
+      return self <= Money(rhs)   
 
 
   def __gt__(self, rhs):
