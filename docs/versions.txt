@@ -1,4 +1,5 @@
 1.0 -- beta
     [#1] -- Initial unit test created.
     [#2] -- Fundamental money class
-    [#4] -- Loan class
+    [#4] -- Loan class, simple daily interest
+    [#8] -- HightestInterestPayer to pay down loans
