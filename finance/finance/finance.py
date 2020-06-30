@@ -6,18 +6,19 @@ import multiprocessing
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .process import Process # \todo need to figure out why I must prepend . to module names
+from .process import Process 
 from .loanreader import LoanReader
 from .money import Money
 from .loan import Loan, LoanStatus, InvalidLoanStatus
 from .obsloan import ObserverLoan
 from .datesubject import DateSubject
 from .loanutils import total_owed_on_loans
+from .account import Account
 
 
 def plot(x, y):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
-  ax.plot(x, y / 1000)
+  ax.plot(x, y / 1000, ls="-.")
   ax.set_title('Total owed on student loans')
   ax.set_xlabel('days')
   ax.set_ylabel('Money (1000 USD)')
@@ -69,6 +70,11 @@ class Finance:
   def run(self):
     """
     """
+
+    account = Account(Money(1000000.00))
+
+
+
     loan_reader = LoanReader('etc/loans.csv')
     # loan_reader = LoanReader('etc/example_loans.csv')
     loan_data = loan_reader.read()
@@ -92,7 +98,6 @@ class Finance:
 
     days = np.arange(0, num_days, 1)
     totals = np.zeros(len(days))
-
     
     current_date = DateSubject(today)
 

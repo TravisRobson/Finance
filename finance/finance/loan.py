@@ -121,7 +121,6 @@ class Loan: # \todo perhaps name SimpleDailyLoan
         num_days_in_year = 366
 
       daily_interest_rate = decimal.Decimal(self._interest / 100.00 / num_days_in_year)
-      print(type(self._balance))
       self._accrued_interest += daily_interest_rate * self._balance 
 
   def apply_money(self, amount) -> None:
@@ -146,7 +145,6 @@ class Loan: # \todo perhaps name SimpleDailyLoan
     else:
       self._accrued_interest = Money(0.00)
       return amount - self._accrued_interest
-
 
   def convert_accrued_to_principal(self) -> None:
     self._balance += self._accrued_interest
