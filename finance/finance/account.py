@@ -12,7 +12,7 @@ class Account:
   def __init__(self, balance=Money()):
     self._balance = balance
 
-  def remove_money(amount):
+  def remove_money(self, amount):
     if amount > self._balance:
       raise InsufficientFunds
     else:

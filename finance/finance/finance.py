@@ -14,11 +14,11 @@ from .obsloan import ObserverLoan
 from .datesubject import DateSubject
 from .loanutils import total_owed_on_loans
 from .account import Account
-
+from .highestinterestpayer import HighestInterestPayer
 
 def plot(x, y):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
-  ax.plot(x, y / 1000, ls="-.")
+  ax.plot(x, y / 1000, ls="-")
   ax.set_title('Total owed on student loans')
   ax.set_xlabel('days')
   ax.set_ylabel('Money (1000 USD)')
@@ -59,9 +59,10 @@ class Finance:
       status = LoanStatus.DEFERRED
     else:
       raise InvalidLoanStatus(datum['status'])
+    min_payment = float(datum['minimum payment'])
 
     try:
-      result = Loan(balance, interest, bill_day, pay_day, status)
+      result = Loan(balance, interest, bill_day, pay_day, status, min_payment)
     except:
       raise
 
@@ -103,7 +104,7 @@ class Finance:
 
     obs_loans = []
     for loan in loans:
-      obs_loans.append(ObserverLoan(loan))
+      obs_loans.append(ObserverLoan(loan, account))
 
     for loan in obs_loans:
       current_date.register(loan)

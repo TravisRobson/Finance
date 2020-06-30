@@ -55,7 +55,7 @@ class ExcessivePayment(Exception):
 
 class Loan: # \todo perhaps name SimpleDailyLoan
 
-  def __init__(self, balance, interest, bill_day, pay_day, status=LoanStatus.IN_PROGRESS):
+  def __init__(self, balance, interest, bill_day, pay_day, status=LoanStatus.IN_PROGRESS, min_payment=Money()):
     """
     Interest rate is APR, assumed to be a percentage.
 
@@ -66,6 +66,7 @@ class Loan: # \todo perhaps name SimpleDailyLoan
       raise InvalidLoanBalance(balance)
     self.validate_day_of_month(bill_day)
     self.validate_day_of_month(pay_day)
+    assert min_payment >= 0.0 
 
     # set values
     if not isinstance(balance, Money):
@@ -76,6 +77,9 @@ class Loan: # \todo perhaps name SimpleDailyLoan
     self._pay_day = int(pay_day)
     self._status = status
     self._accrued_interest = Money(0.00)
+    if not isinstance(min_payment, Money):
+      min_payment = Money(min_payment)
+    self._min_payment = min_payment
 
   def __str__(self):
     msg = (
@@ -103,6 +107,14 @@ class Loan: # \todo perhaps name SimpleDailyLoan
   @property
   def pay_day(self):
     return self._pay_day
+
+  @property
+  def min_payment(self):
+    return self._min_payment
+
+  @property
+  def status(self):
+    return self._status
   
 
   def validate_day_of_month(self, day):
