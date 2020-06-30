@@ -14,7 +14,7 @@ from .obsloan import ObserverLoan
 from .datesubject import DateSubject
 from .loanutils import total_owed_on_loans
 from .account import Account
-from .highestinterestpayer import HighestInterestPayer
+from .highinterestpayer import HighestInterestFirstPayer
 
 def plot(x, y):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
@@ -108,6 +108,12 @@ class Finance:
 
     for loan in obs_loans:
       current_date.register(loan)
+
+    high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(1000.00))
+    current_date.register(high_interest_payer)
+
+
+
 
     for day in range(num_days):
       current_date.increment_day()

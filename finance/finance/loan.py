@@ -115,6 +115,11 @@ class Loan: # \todo perhaps name SimpleDailyLoan
   @property
   def status(self):
     return self._status
+
+  @property
+  def interest(self):
+    return self._interest
+  
   
 
   def validate_day_of_month(self, day):
