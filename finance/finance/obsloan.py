@@ -18,6 +18,16 @@ class ObserverLoan(Observer):
     self._loan = loan
     self._account = account # the account which to take payments from
 
+
+  def __str__(self):
+    return str(self._loan)
+
+
+  @property
+  def total_owed(self):
+    return self._loan.total_owed
+  
+
   def update(self, subject):
     tt = subject.date.timetuple()
     bill_date = datetime.date(tt.tm_year, tt.tm_mon, self._loan.bill_day) 
@@ -33,7 +43,13 @@ class ObserverLoan(Observer):
     makePayment = self._account and todayIsPayDay and loanInProgress
 
     if makePayment:
-      self._account.remove_money(self._loan.min_payment)
-      self._loan.apply_money(self._loan.min_payment)
+
+      amount = self._loan.min_payment
+      if amount > self._loan.total_owed:
+        amount = self._loan.total_owed
+
+      self._account.remove_money(amount)
+      self._loan.apply_money(amount)
+
 
       

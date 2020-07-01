@@ -109,14 +109,24 @@ class Finance:
     for loan in obs_loans:
       current_date.register(loan)
 
-    high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(1000.00))
-    current_date.register(high_interest_payer)
-
 
 
 
     for day in range(num_days):
+
+
+      high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
+      current_date.register(high_interest_payer)
+
       current_date.increment_day()
+
+      obs_loans = [l for l in obs_loans if l.total_owed != Money()]
+      loans = [l for l in loans if l.total_owed != Money()]
+      
+      current_date.unregister(high_interest_payer)
+
+
+
       totals[day] = float(total_owed_on_loans(loans))
 
     if not self.options.known.disable_figure:
