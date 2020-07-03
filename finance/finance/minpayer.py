@@ -1,7 +1,6 @@
 
 
 from .observer import Observer
-from .loan import LoanStatus
 
 
 class MinPaymentPayer(Observer):

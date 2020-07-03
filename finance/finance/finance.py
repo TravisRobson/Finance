@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 from .process import Process 
 from .loanreader import LoanReader
 from .money import Money
-from .loan import Loan, LoanStatus, InvalidLoanStatus
+from .loan import Loan
 from .obsloan import ObserverLoan
 from .datesubject import DateSubject
 from .loanutils import total_owed_on_loans
 from .account import Account
 from .highinterestpayer import HighestInterestFirstPayer
+
 
 def plot(x, y):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
@@ -31,19 +32,6 @@ class Finance:
   def __init__(self, options):
     self.options = options
     self.process = Process()
-
-  def list_csv_files(self):
-    return self._get_csv_files()
-
-  def _get_csv_files(self):
-    """
-    List the *.csv files inside the etc/ folder
-
-    Right now this is merely serving the purpose of an example for the 
-    class that can run subprocesses
-    """
-    return self.process.run("ls etc/*.csv" ).decode('utf-8') 
-
 
   def loan_datum_to_loan(self, datum):
     """Convert loanreader's data into Loan instances"""
@@ -62,7 +50,8 @@ class Finance:
     min_payment = float(datum['minimum payment'])
 
     try:
-      result = Loan(balance, interest, bill_day, pay_day, status, min_payment)
+      #result = Loan(balance, interest, bill_day, pay_day, status, min_payment)
+      raise
     except:
       raise
 
@@ -71,64 +60,63 @@ class Finance:
   def run(self):
     """
     """
-
     account = Account(Money(1000000.00))
 
 
 
-    loan_reader = LoanReader('etc/loans.csv')
-    # loan_reader = LoanReader('etc/example_loans.csv')
-    loan_data = loan_reader.read()
-    # \todo need something to validate the data
+    # loan_reader = LoanReader('etc/loans.csv')
+    # # loan_reader = LoanReader('etc/example_loans.csv')
+    # loan_data = loan_reader.read()
+    # # \todo need something to validate the data
 
-    loans = []
-    for datum in loan_data:
-      loans.append(self.loan_datum_to_loan(datum))
+    # loans = []
+    # for datum in loan_data:
+    #   loans.append(self.loan_datum_to_loan(datum))
 
-    total = total_owed_on_loans(loans)
-    print(f'Total balance {total}')
-
-
-    # End date will trump num_days
-    num_days = self.options.known.num_days
-    today = datetime.datetime.today()
-    if self.options.known.end_date:
-      end_date = datetime.datetime.strptime(self.options.known.end_date, '%b %d %Y')
-      num_days = (end_date - today).days
+    # total = total_owed_on_loans(loans)
+    # print(f'Total balance {total}')
 
 
-    days = np.arange(0, num_days, 1)
-    totals = np.zeros(len(days))
+    # # End date will trump num_days
+    # num_days = self.options.known.num_days
+    # today = datetime.datetime.today()
+    # if self.options.known.end_date:
+    #   end_date = datetime.datetime.strptime(self.options.known.end_date, '%b %d %Y')
+    #   num_days = (end_date - today).days
+
+
+    # days = np.arange(0, num_days, 1)
+    # totals = np.zeros(len(days))
     
-    current_date = DateSubject(today)
+    # current_date = DateSubject(today)
 
-    obs_loans = []
-    for loan in loans:
-      obs_loans.append(ObserverLoan(loan, account))
+    # obs_loans = []
+    # for loan in loans:
+    #   obs_loans.append(ObserverLoan(loan, account))
 
-    for loan in obs_loans:
-      current_date.register(loan)
+    # for loan in obs_loans:
+    #   current_date.register(loan)
 
-    high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
-    current_date.register(high_interest_payer)
+    # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
+    # current_date.register(high_interest_payer)
 
-    for day in range(num_days):
+    # for day in range(num_days):
 
-      # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
-      # current_date.register(high_interest_payer)
+    #   # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
+    #   # current_date.register(high_interest_payer)
 
-      current_date.increment_day()
+    #   current_date.increment_day()
 
-      # obs_loans = [l for l in obs_loans if l.total_owed != Money()]
-      # loans = [l for l in loans if l.total_owed != Money()]
+    #   # obs_loans = [l for l in obs_loans if l.total_owed != Money()]
+    #   # loans = [l for l in loans if l.total_owed != Money()]
       
-      # current_date.unregister(high_interest_payer)
+    #   # current_date.unregister(high_interest_payer)
 
-      totals[day] = float(total_owed_on_loans(loans))
+    #   totals[day] = float(total_owed_on_loans(loans))
 
 
-    if not self.options.known.disable_figure:
-      proc = multiprocessing.Process(target=plot, args=(days, totals))
-      proc.start()
+    # if not self.options.known.disable_figure:
+    #   proc = multiprocessing.Process(target=plot, args=(days, totals))
+    #   proc.start()
 
-    print(f'Total balance {total_owed_on_loans(loans)}')
+    # print(f'Total balance {total_owed_on_loans(loans)}')

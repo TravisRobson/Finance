@@ -9,7 +9,7 @@ class InvalidBillDayOfMonth(Exception):
     return f"value ({self._value})"
 
   @staticmethod
-  def isValid(self, day):
+  def is_valid(day):
     if not 1 <= int(day) <= 28:
       return False
     return True
