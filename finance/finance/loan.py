@@ -40,7 +40,7 @@ class Loan:
     return msg
  
   def __repr__(self):
-    return f"{repr(self._loan_info)}, {rer(self._bill_info)}, {repr(self._accrued_interest)}"
+    return f"{repr(self._loan_info)}, {repr(self._bill_info)}, {repr(self._accrued_interest)}"
 
   @property
   def balance(self):
@@ -105,5 +105,5 @@ class Loan:
       return amount - self._accrued_interest
 
   def convert_accrued_to_principal(self) -> None:
-    self._loan_info.balance += self._accrued_interest
+    self._loan_info.balance += round(self._accrued_interest, 2)
     self._accrued_interest = Money(0.00)

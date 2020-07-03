@@ -54,7 +54,7 @@ def test_convert_accrued_to_principal(zero_accured_loan, num_days):
   """
   for i in range(num_days):
     zero_accured_loan.accrue_daily(2024)
-  total_owed = zero_accured_loan.total_owed
+  total_owed = round(zero_accured_loan.total_owed, 2)
   zero_accured_loan.convert_accrued_to_principal()
   assert total_owed == zero_accured_loan.total_owed
   assert total_owed == zero_accured_loan.balance

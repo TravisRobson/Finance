@@ -32,6 +32,11 @@ class DateSubject(Subject):
   def date(self):
     return self._date
 
+  @property
+  def year(self):
+    return self._date.year
+  
+
   def increment_day(self):
     self._date += datetime.timedelta(days=1)
     self.notify()

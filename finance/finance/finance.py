@@ -93,21 +93,17 @@ class Finance:
     min_pay_loans = []
     for l in loans:
       min_pay_loans.append(MinPaymentPayer(l, account))
+
+    for l in min_pay_loans:
       current_date.register(l)
 
     interest_accruers = []
     for l in loans:
       interest_accruers.append(InterestAccruer(l))
+
+    for l in interest_accruers:
       current_date.register(l)
 
-
-
-    # obs_loans = []
-    # for loan in loans:
-    #   obs_loans.append(ObserverLoan(loan, account))
-
-    # for loan in obs_loans:
-    #   current_date.register(loan)
 
     # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
     # current_date.register(high_interest_payer)

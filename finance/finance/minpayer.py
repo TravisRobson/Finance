@@ -2,7 +2,6 @@
 
 import datetime
 
-from .exceptions import InvalidBillDayOfMonth
 from .observer import Observer
 
 
