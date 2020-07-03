@@ -8,26 +8,18 @@ from random import randint
 
 import pytest
 
+from finance.finance.billinfo import BillInfo
+from finance.finance.loaninfo import LoanInfo
 from finance.finance.money import Money, almost_equal
-from finance.finance.loan import Loan, InvalidLoanBalance
-
-
-@pytest.mark.parametrize("balance", [
-  (Money(0.00)),
-  (Money(-10.00)),
-])
-def test_init_raise_exception_invalid_balance(balance):
-  """Loans cannot have non-positive balances"""
-  bill_info = BillInfo(day=1, min_amount=Money())
-  with pytest.raises(InvalidLoanBalance):
-    loan = Loan(balance, 0.00, 1, bill_info)
+from finance.finance.loan import Loan
 
 
 @pytest.fixture
 def zero_accured_loan():
   """Return a loan with zero accrued interest with 1% interest rate (APR)"""
-  bill_info = BillInfo(day=1, min_amount=Money())
-  return Loan(Money(100.00), interest=1.00, pay_day=1, bill_info=bill_info)
+  bill_info = BillInfo(day=1, amount=Money())
+  loan_info = LoanInfo(Money(100.00), interest=1.00)
+  return Loan(loan_info, bill_info)
 
 
 @pytest.mark.parametrize("amount, expected", [

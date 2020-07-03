@@ -12,12 +12,13 @@ class MinPaymentPayer(Observer):
   then make the minimum payment. Don't overpay if the loan's balance is
   less than the minimum payment.
   """
-  def __init__(self, loan):
+  def __init__(self, loan, account):
     self._loan = loan # the loan observing the date
+    self._account = account
 
 
-  def update(self):
+  def update(self, subject):
     """When date is incremented by a date, this function is called."""
-    pass
+    
   
 
