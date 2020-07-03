@@ -3,7 +3,7 @@
 import datetime 
 
 from .loan import Loan
-from .obsloan import Observer
+from .observer import Observer
 from .money import Money
 
 

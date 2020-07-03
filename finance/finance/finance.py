@@ -10,13 +10,13 @@ from .account import Account
 from .billinfo import BillInfo
 from .datesubject import DateSubject
 from .highinterestpayer import HighestInterestFirstPayer
+from .interestaccruer import InterestAccruer
 from .loan import Loan
 from .loaninfo import LoanInfo
 from .loanreader import LoanReader
 from .loanutils import total_owed_on_loans
 from .minpayer import MinPaymentPayer
 from .money import Money
-from .obsloan import ObserverLoan
 from .process import Process 
 
 
@@ -93,9 +93,14 @@ class Finance:
     min_pay_loans = []
     for l in loans:
       min_pay_loans.append(MinPaymentPayer(l, account))
-
-    for l in min_pay_loans:
       current_date.register(l)
+
+    interest_accruers = []
+    for l in loans:
+      interest_accruers.append(InterestAccruer(l))
+      current_date.register(l)
+
+
 
     # obs_loans = []
     # for loan in loans:
