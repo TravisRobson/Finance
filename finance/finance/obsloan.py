@@ -29,27 +29,28 @@ class ObserverLoan(Observer):
   
 
   def update(self, subject):
-    tt = subject.date.timetuple()
-    bill_date = datetime.date(tt.tm_year, tt.tm_mon, self._loan.bill_day) 
-    self._loan.accrue_daily(tt.tm_year)
+    if self.total_owed:
+      tt = subject.date.timetuple()
+      bill_date = datetime.date(tt.tm_year, tt.tm_mon, self._loan.bill_day) 
+      self._loan.accrue_daily(tt.tm_year)
 
-    if bill_date == subject.date.date():
-      self._loan.convert_accrued_to_principal()
+      if bill_date == subject.date.date():
+        self._loan.convert_accrued_to_principal()
 
-    pay_date = datetime.date(tt.tm_year, tt.tm_mon, self._loan.pay_day) 
+      pay_date = datetime.date(tt.tm_year, tt.tm_mon, self._loan.pay_day) 
 
-    todayIsPayDay = pay_date == subject.date.date()
-    loanInProgress = self._loan.status == LoanStatus.IN_PROGRESS
-    makePayment = self._account and todayIsPayDay and loanInProgress
+      todayIsPayDay = pay_date == subject.date.date()
+      loanInProgress = self._loan.status == LoanStatus.IN_PROGRESS
+      makePayment = self._account and todayIsPayDay and loanInProgress
 
-    if makePayment:
+      if makePayment:
 
-      amount = self._loan.min_payment
-      if amount > self._loan.total_owed:
-        amount = self._loan.total_owed
+        amount = self._loan.min_payment
+        if amount > self._loan.total_owed:
+          amount = self._loan.total_owed
 
-      self._account.remove_money(amount)
-      self._loan.apply_money(amount)
+        self._account.remove_money(amount)
+        self._loan.apply_money(amount)
 
 
       

@@ -24,6 +24,7 @@ class Subject(abc.ABC):
 class DateSubject(Subject):
 
   def __init__(self, date):
+    
     self._date = date
     self._observers = []
 

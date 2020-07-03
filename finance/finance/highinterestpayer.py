@@ -35,24 +35,39 @@ class HighestInterestFirstPayer(Observer):
     tt = subject.date.timetuple()
     pay_date = datetime.date(tt.tm_year, tt.tm_mon, self._pay_day)
 
-    sorted_loans = sorted(self._loan_list, key=lambda x: x.interest, reverse=True)
+    non_zero_loans = [l for l in self._loan_list if l.total_owed != Money()]
+
+    # sorted_loans = sorted(self._loan_list, key=lambda x: x.interest, reverse=True)
+
+    sorted_loans = sorted(non_zero_loans, key=lambda x: x.interest, reverse=True)
 
     idx = 0
     if pay_date == subject.date.date() and sorted_loans:
 
-      amount = self._amount_per_payment
-      while amount > Money():
+      current_loan = sorted_loans[idx]
 
+      amount = self._amount_per_payment
+      while amount.__round__(2) > Money().__round__(2):
+
+        non_zero_loans = [l for l in self._loan_list if l.total_owed != Money()]
+        sorted_loans = sorted(non_zero_loans, key=lambda x: x.interest, reverse=True)
+        if not sorted_loans:
+          return
+        print(f"{amount.__repr__()}")
         amount_to_pay = amount
 
-        if amount_to_pay > sorted_loans[idx].total_owed:
-          amount_to_pay = sorted_loans[idx].total_owed
-          amount -= sorted_loans[idx].total_owed
+        if amount_to_pay > current_loan.total_owed:
+          amount_to_pay = current_loan.total_owed
+          amount -= current_loan.total_owed
           idx += 1
+          if idx == len(non_zero_loans):
+            return
           # if idx >= len(sorted_loans):
           #   return
         else:
           amount = Money()
 
+        print(f"{amount_to_pay}, {current_loan.total_owed}, {amount.__repr__() > Money().__repr__()}")
+
         self._account.remove_money(amount_to_pay)
-        sorted_loans[idx].apply_money(amount_to_pay)
+        current_loan.apply_money(amount_to_pay)
