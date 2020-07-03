@@ -1,24 +1,10 @@
 #!/usr/bin/env python3
 
-import enum
 import calendar
 import decimal
 
 from .money import Money
-
-
-class LoanStatus(enum.Enum):
-  IN_PROGRESS = 1 # \todo I don't think the following usage of the terms is right or consistent between loans
-  DEFERRED = 2 # I intended this to be interest is accruing, but payments don't need to be made
-  FORBEARANCE = 3 # I intended this to be no payments, no accruing
-
-class InvalidDayOfMonth(Exception):
-
-  def __init__(self, value):
-    self._value = value
-
-  def __str__(self):
-    return f"value ({self._value})"
+from .exceptions import InvalidBillDayOfMonth
 
 
 class InvalidLoanBalance(Exception):
@@ -55,42 +41,41 @@ class ExcessivePayment(Exception):
 
 class Loan: # \todo perhaps name SimpleDailyLoan
 
-  def __init__(self, balance, interest, bill_day, pay_day, status=LoanStatus.IN_PROGRESS, min_payment=Money()):
+  def __init__(self, balance, interest, pay_day, bill_info):
     """
     Interest rate is APR, assumed to be a percentage.
 
     I am going to assume simple daily interest loan
     """
-    # validate
+    self._validate_args(balance, pay_day)
+
+    # convert floats to money
+    if not isinstance(balance, Money): 
+      balance = Money(balance)
+
+    self._balance = balance.__round__(2) # Ensure balance is rounded to pennies.
+    self._interest = interest # APR
+    self._pay_day = int(pay_day)
+    self._bill_info = bill_info
+    self._accrued_interest = Money(0.00)
+
+  def _validate_args(balance, pay_day):
     if not balance > 0.0:
       raise InvalidLoanBalance(balance)
-    self.validate_day_of_month(bill_day)
-    self.validate_day_of_month(pay_day)
-    assert min_payment >= 0.0 
 
-    # set values
-    if not isinstance(balance, Money):
-      balance = Money(balance)
-    self._balance = balance.__round__(2)
-    self._interest = interest # APR
-    self._bill_day = int(bill_day)
-    self._pay_day = int(pay_day)
-    self._status = status
-    self._accrued_interest = Money(0.00)
-    if not isinstance(min_payment, Money):
-      min_payment = Money(min_payment)
-    self._min_payment = min_payment
+    if not InvalidBillDayOfMonth.isValid(pay_day):
+      raise InvalidBillDayOfMonth(pay_day)
 
   def __str__(self):
     msg = (
       f"{self._balance}, {self._interest}%, {self._accrued_interest}, "
-      f"bill day: {self._bill_day}, "
-      f"pay day: {self._pay_day}, {self._status}"
+      f"bill info: {self._bill_info}, "
+      f"pay day: {self._pay_day}"
     )
     return msg
  
   def __repr__(self):
-    return f"{self._balance}, {self._interest}, {self._accrued_interest}, {self._bill_day}, {self._pay_day}, {self._status}"
+    return f"{self._balance}, {self._interest}, {self._accrued_interest}, {self._bill_info}, {self._pay_day}"
 
   @property
   def balance(self):
@@ -102,7 +87,7 @@ class Loan: # \todo perhaps name SimpleDailyLoan
   
   @property
   def bill_day(self):
-    return self._bill_day
+    return self._bill_info.day
 
   @property
   def pay_day(self):
@@ -110,25 +95,15 @@ class Loan: # \todo perhaps name SimpleDailyLoan
 
   @property
   def min_payment(self):
-    return self._min_payment
+    return self._bill_info.min_amount
 
   @property
   def status(self):
-    return self._status
+    return self._bill_info.in_progress
 
   @property
   def interest(self):
     return self._interest
-  
-  
-
-  def validate_day_of_month(self, day):
-    """
-    Max of 28 because you can't have a recurring date which doesn't fall
-    within a non-leap year February.
-    """
-    if not 1 <= int(day) <= 28: 
-      raise InvalidDayOfMonth(day)
 
   def accrue_daily(self, year) -> None:
     # get current month from date

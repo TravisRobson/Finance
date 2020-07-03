@@ -18,14 +18,16 @@ from finance.finance.loan import Loan, InvalidLoanBalance
 ])
 def test_init_raise_exception_invalid_balance(balance):
   """Loans cannot have non-positive balances"""
+  bill_info = BillInfo(day=1, min_amount=Money())
   with pytest.raises(InvalidLoanBalance):
-    loan = Loan(balance, 0.00, 1, 1)
+    loan = Loan(balance, 0.00, 1, bill_info)
 
 
 @pytest.fixture
 def zero_accured_loan():
   """Return a loan with zero accrued interest with 1% interest rate (APR)"""
-  return Loan(Money(100.00), interest=1.00, bill_day=1, pay_day=1)
+  bill_info = BillInfo(day=1, min_amount=Money())
+  return Loan(Money(100.00), interest=1.00, pay_day=1, bill_info=bill_info)
 
 
 @pytest.mark.parametrize("amount, expected", [
