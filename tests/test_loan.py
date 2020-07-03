@@ -27,9 +27,9 @@ def zero_accured_loan():
   (Money(5.00), Money(95.00)),
   (Money(67), Money(33))
 ])
-def test_apply_money(zero_accured_loan, amount, expected):
+def test_make_payment(zero_accured_loan, amount, expected):
   """If you apply $1 to a loan, its balance should descrease by $1"""
-  zero_accured_loan.apply_money(amount)
+  zero_accured_loan.make_payment(amount)
   assert zero_accured_loan.balance == expected
 
 

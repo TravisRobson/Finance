@@ -3,10 +3,7 @@
 import calendar
 import decimal
 
-from .loaninfo import LoanInfo
 from .money import Money
-from .exceptions import InvalidBillDayOfMonth
-
 
 class ExcessivePayment(Exception):
 
@@ -36,7 +33,8 @@ class Loan:
 
   def __str__(self):
     msg = (
-      f"loan info: {self._loan_info}, accrued interest: {self._accrued_interest}, "
+      f"loan info: {self._loan_info}, "
+      f"accrued interest: {self._accrued_interest}, "
       f"bill info: {self._bill_info}, "
     )
     return msg
@@ -72,17 +70,18 @@ class Loan:
   def bill_in_progress(self):
     return self._bill_info.in_progress
 
+  def _calc_daily_interest(self, year):
+    num_days_in_year = 365
+    if calendar.isleap(year):
+      num_days_in_year = 366
+
+    return decimal.Decimal(self.interest / 100.00 / num_days_in_year)
+
   def accrue_daily(self, year) -> None:
-    # get current month from date
     if self.accruing:
-      num_days_in_year = 365
-      if calendar.isleap(year):
-        num_days_in_year = 366
+      self._accrued_interest += self._calc_daily_interest(year) * self.balance 
 
-      daily_interest_rate = decimal.Decimal(self.interest / 100.00 / num_days_in_year)
-      self._accrued_interest += daily_interest_rate * self.balance 
-
-  def apply_money(self, amount) -> None:
+  def make_payment(self, amount) -> None:
     """
     It is the reponsibility of the user to not attempt to pay more 
     than what is owed.

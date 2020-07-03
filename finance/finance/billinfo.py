@@ -35,5 +35,5 @@ class BillInfo():
     return self._amount
 
   @property
-  def date(self):
+  def day(self):
     return self._day
