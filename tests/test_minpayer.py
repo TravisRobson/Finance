@@ -28,7 +28,7 @@ def test_not_in_progress(current_date):
   initial_balance = Money(100.00)
 
   # create loan where minimum payment is the day after ptest fixture's date.
-  bill_info = BillInfo(day=5, amount=Money(10.00), in_progress=False)
+  bill_info = BillInfo(day=5, amount=Money(10.00), in_progress=False) # date chose to not coincide with dates of test
   loan_info = LoanInfo(initial_balance, interest=1.00)
   loan = Loan(loan_info, bill_info)
 
@@ -50,7 +50,7 @@ def test_in_progress(current_date):
   initial_balance = Money(100.00)
 
   # create loan where minimum payment is the day after ptest fixture's date.
-  bill_info = BillInfo(day=5, amount=Money(10.00), in_progress=True)
+  bill_info = BillInfo(day=5, amount=Money(10.00), in_progress=True) # date chose to not coincide with dates of test
   loan_info = LoanInfo(initial_balance, interest=1.00)
   loan = Loan(loan_info, bill_info)
 
@@ -62,3 +62,44 @@ def test_in_progress(current_date):
   current_date.increment_day()
   assert account.balance != initial_amount
   assert loan.total_owed != initial_balance
+
+
+@pytest.mark.parametrize("min_payment", [Money(1.00), Money(5.34), Money(25.00)])
+def test_payment_reduces_balance(current_date, min_payment):
+  """
+  When bill day is hit, loan total_owed reduces 
+  by the minimum payment amount. Same with account balance.
+  """
+  initial_balance = Money(100.00)
+  bill_info = BillInfo(day=5, amount=min_payment) # date chose to not coincide with dates of test
+  loan_info = LoanInfo(initial_balance, interest=1.00)
+  loan = Loan(loan_info, bill_info)
+
+  initial_amount = Money(1000.00)
+  account = Account(initial_amount) # a reserve of money
+  payer = MinPaymentPayer(loan, account)
+
+  current_date.register(payer)
+  current_date.increment_day()
+  assert account.balance == initial_amount - min_payment
+  assert loan.total_owed == initial_balance - min_payment
+
+@pytest.mark.parametrize("min_payment", [Money(101.00), Money(105.34), Money(250.00)])
+def test_payment_reduces_balance(current_date, min_payment):
+  """
+  When bill day is hit, loan total_owed reduces to zero
+  when minimum payment exceed amount owed on loan.
+  """
+  initial_balance = Money(100.00)
+  bill_info = BillInfo(day=5, amount=min_payment) # date chose to not coincide with dates of test
+  loan_info = LoanInfo(initial_balance, interest=1.00)
+  loan = Loan(loan_info, bill_info)
+
+  initial_amount = Money(1000.00)
+  account = Account(initial_amount) # a reserve of money
+  payer = MinPaymentPayer(loan, account)
+
+  current_date.register(payer)
+  current_date.increment_day()
+  assert account.balance == initial_amount - initial_balance
+  assert loan.total_owed == Money(0.00)
