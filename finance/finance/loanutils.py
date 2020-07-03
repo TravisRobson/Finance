@@ -10,3 +10,7 @@ def total_owed_on_loans(loan_list):
     total += loan.total_owed
 
   return total
+
+
+def sort_high_interest_first(loans):
+  return sorted(loans, key=lambda x: x.interest, reverse=True)
