@@ -1,5 +1,6 @@
 
 
+import copy
 import datetime
 
 import pytest
@@ -11,6 +12,10 @@ from finance.finance.highinterestpayer import HighestInterestFirstPayer
 from finance.finance.loan import Loan
 from finance.finance.loaninfo import LoanInfo
 from finance.finance.money import Money
+
+
+def next_day(date):
+  return (date + datetime.timedelta(days=1)).day
 
 
 @pytest.fixture
@@ -29,7 +34,7 @@ def test_nonzero_balance_loan(current_date):
   account = Account(init_account_balance)
 
   bill_info = BillInfo(day=10, amount=Money(1.00)) 
-  loan_info = LoanInfo(Money(100.00), interest=1.00, accruing=True)
+  loan_info = LoanInfo(Money(100.00), interest=1.00)
 
   loans = [Loan(loan_info, bill_info)]
 
@@ -54,13 +59,13 @@ def test_account_loan_balance_adjusts(current_date):
 
   init_loan_balance = Money(100.00)
   bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
-  loan_info = LoanInfo(init_loan_balance, interest=1.00, accruing=True)
+  loan_info = LoanInfo(init_loan_balance, interest=1.00)
 
   loans = [Loan(loan_info, bill_info)]
 
   # pay day after current_date (5)
   pay_amount = Money(10.00)
-  payer = HighestInterestFirstPayer(loans, account, 5, pay_amount)
+  payer = HighestInterestFirstPayer(loans, account, next_day(current_date.date), pay_amount)
   init_total_owed = payer.total_owed
 
   current_date.register(payer)
@@ -76,7 +81,25 @@ def test_dont_overpay_small_balance_loan(current_date):
   HighestInterestFirstPayer's amount is greater than that balance
   do not overpay.
   """
-  assert False
+  init_account_balance = Money(10000.00)
+  account = Account(init_account_balance)
+
+  init_loan_balance = Money(100.00)
+  bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
+  loan_info = LoanInfo(init_loan_balance, interest=1.00)
+
+  loans = [Loan(loan_info, bill_info)]
+
+  # pay day after current_date (5)
+  pay_amount = Money(200.00)
+  payer = HighestInterestFirstPayer(loans, account, next_day(current_date.date), pay_amount)
+  init_total_owed = payer.total_owed
+
+  current_date.register(payer)
+  current_date.increment_day()
+
+  assert account.balance + init_loan_balance == init_account_balance
+  assert loans[0].total_owed == Money(0.00)
 
 
 def test_highest_interest_first(current_date):
@@ -84,7 +107,30 @@ def test_highest_interest_first(current_date):
   If there are 2+ loans, the loan with highest interest 
   receives the payment.
   """
-  assert False
+  init_account_balance = Money(10000.00)
+  account = Account(init_account_balance)
+
+  init_loans = []
+  init_loan_balance = Money(100.00)
+  bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
+  loan_info = LoanInfo(init_loan_balance, interest=1.00)  
+  init_loans.append(Loan(loan_info, bill_info))
+
+  loan_info = LoanInfo(init_loan_balance, interest=loan_info.interest + 1.00)  
+  init_loans.append(Loan(loan_info, bill_info))
+
+  loans = copy.deepcopy(init_loans)
+
+  payer = HighestInterestFirstPayer(loans, account, next_day(current_date.date), Money(100.00))
+
+  current_date.register(payer)
+  current_date.increment_day() 
+
+  # second loan, the higher interest one, should have a different balance
+  assert init_loans[1].balance != loans[1].balance
+
+  # but lower interest one should be unchanged in this test
+  assert init_loans[0].balance == loans[0].balance
 
 
 def test_multiple_loans_highest_interest_first(current_date):
@@ -93,23 +139,52 @@ def test_multiple_loans_highest_interest_first(current_date):
   loan's remaining balance, and then some, the second highest interest
   loan is the loan whose balance gets paid down.
   """
-  assert False
+  init_account_balance = Money(10000.00)
+  account = Account(init_account_balance)
+
+  init_loans = []
+  init_loan_balance = Money(100.00)
+  bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
+  loan_info = LoanInfo(init_loan_balance, interest=1.00)  
+  init_loans.append(Loan(loan_info, bill_info))
+
+  loan_info = LoanInfo(init_loan_balance, interest=loan_info.interest + 1.00)  
+  init_loans.append(Loan(loan_info, bill_info))
+
+  loan_info = LoanInfo(init_loan_balance, interest=loan_info.interest - 0.50)  
+  init_loans.append(Loan(loan_info, bill_info))  
+
+  loans = copy.deepcopy(init_loans)
+
+  payer = HighestInterestFirstPayer(loans, account, next_day(current_date.date), init_loan_balance + Money(50.00))
+
+  current_date.register(payer)
+  current_date.increment_day() 
+
+  # first loan in this test should remain unchanged.
+  assert loans[0].balance == init_loans[0].balance
+
+  # Second loan should have zero money left
+  assert loans[1].balance == Money(0.00)
+
+  # Third loan should have a reduced balance
+  assert loans[2].balance == init_loans[2].balance - Money(50.00)
 
 
-def test_highest_interest_accruing(current_date):
-  """
-  If there are multiple loans, it's the highest interest loans who
-  are accruing that are addressed first.
-  """
-  assert False
+# def test_highest_interest_accruing(current_date):
+#   """
+#   If there are multiple loans, it's the highest interest loans who
+#   are accruing that are addressed first.
+#   """
+#   assert False
 
 
-def test_nonaccruing(current_date):
-  """
-  If all accruing loans have been paid off, the highest interest nonaccruing
-  loans begin to get paid down.
-  """
-  assert False
+# def test_nonaccruing(current_date):
+#   """
+#   If all accruing loans have been paid off, the highest interest nonaccruing
+#   loans begin to get paid down.
+#   """
+#   assert False
 
 
 

@@ -39,15 +39,22 @@ class HighestInterestFirstPayer(Observer):
     tt = subject.date.timetuple()
     return datetime.date(tt.tm_year, tt.tm_mon, self._day) 
 
-  def _update_loans(self, loans):
+  def _update_loans(self, loans, payment_amount):
     sorted_loans = sort_high_interest_first(loans)
+    
+    index = 0
+    amount_left = payment_amount
+    while amount_left > Money(0.00) and index < len(loans):
+      loan = sorted_loans[index]
+      amount = min(amount_left, loan.total_owed)
 
-    loan = sorted_loans[0]
+      self._account.remove_money(amount)
+      loan.make_payment(amount)
 
-    amount = min([self._amount, loan.total_owed])
+      amount_left -= amount
+      index += 1
 
-    self._account.remove_money(amount)
-    loan.make_payment(amount)
+    return amount_left
 
   def update(self, subject):
     """
@@ -58,7 +65,11 @@ class HighestInterestFirstPayer(Observer):
     if bill_date == subject.date:
       nonzero_loans = [l for l in self._loans if l.total_owed != Money()]
       accruing_loans = [l for l in self._loans if l.accruing]
-      self._update_loans(accruing_loans)
+      amount_left = self._update_loans(accruing_loans, self._amount)
+
+      if amount_left > Money(0.00):
+        nonacrruing_loans = [l for l in self._loans if not l.accruing]
+        self._update_loans(nonacrruing_loans, amount_left)
     
 
 

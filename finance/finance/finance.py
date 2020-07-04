@@ -5,6 +5,7 @@ import multiprocessing
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 from .account import Account
 from .billinfo import BillInfo
@@ -22,10 +23,15 @@ from .process import Process
 
 def plot(x, y):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
+
   ax.plot(x, y / 1000, ls="-")
+  ax.xaxis.set_major_formatter(mdates.DateFormatter('%b, %y'))
+  ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+
   ax.set_title('Total owed on student loans')
   ax.set_xlabel('days')
   ax.set_ylabel('Money (1000 USD)')
+  plt.gcf().autofmt_xdate()
   plt.tight_layout()
   plt.show()
 
@@ -65,7 +71,8 @@ class Finance:
   def run(self):
     """
     """
-    account = Account(Money(1000000.00))
+    initial_amount = Money(1000000.00)
+    account = Account(initial_amount)
 
     loan_reader = LoanReader('etc/loans.csv')
     # loan_reader = LoanReader('etc/example_loans.csv')
@@ -85,8 +92,12 @@ class Finance:
       end_date = datetime.datetime.strptime(self.options.known.end_date, '%b %d %Y')
       num_days = (end_date - today).days
 
-    days = np.arange(0, num_days, 1)
-    totals = np.zeros(len(days))
+    days = np.arange(0, num_days + 1, 1)
+    totals = np.array([])
+
+    dates = []
+    dates.append(today)
+    totals = np.append(totals, float(total_owed_on_loans(loans)))
     
     current_date = DateSubject(today)
 
@@ -104,26 +115,26 @@ class Finance:
     for l in interest_accruers:
       current_date.register(l)
 
+    high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
+    current_date.register(high_interest_payer)
 
-    # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
-    # current_date.register(high_interest_payer)
-
-    for day in range(num_days):
-
-    #   # high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
-    #   # current_date.register(high_interest_payer)
+    for day in range(1,num_days+1):
 
       current_date.increment_day()
+      dates.append(current_date.date)
 
-    #   # obs_loans = [l for l in obs_loans if l.total_owed != Money()]
-    #   # loans = [l for l in loans if l.total_owed != Money()]
-      
-    #   # current_date.unregister(high_interest_payer)
+      totals = np.append(totals, float(total_owed_on_loans(loans)))
 
-      totals[day] = float(total_owed_on_loans(loans))
+      if total_owed_on_loans(loans) == Money(0.00):
+        break
+
+
 
     if not self.options.known.disable_figure:
-      proc = multiprocessing.Process(target=plot, args=(days, totals))
+      proc = multiprocessing.Process(target=plot, args=(dates, totals))
       proc.start()
 
     print(f'Total balance {total_owed_on_loans(loans)}')
+    total_days = (dates[-1] - today).days
+    print(f'Last day: {dates[-1]}, total days: {total_days}, i.e. ~{total_days/365.:.2f} years')
+    print(f'Amount paid: {initial_amount-account.balance}')
