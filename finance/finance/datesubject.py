@@ -28,6 +28,12 @@ class DateSubject(Subject):
     self._date = date
     self._observers = []
 
+  def __str__(self):
+    return f"{self._date}"
+
+  def __repr__(self):
+    return str(self)
+
   @property
   def date(self):
     return self._date
