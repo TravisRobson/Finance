@@ -11,6 +11,8 @@ from .highinterestpayer import HighestInterestFirstPayer
 from .interestaccruer import InterestAccruer
 from .loanutils import total_owed_on_loans
 from .loanprocessor import LoanProcessor
+from .startbilling import StartBillingObserver
+from .startaccruing import StartAccruingObserver
 from .minpayer import MinPaymentPayer
 from .moneydateplot import money_date_plot
 from .money import Money
@@ -41,8 +43,33 @@ class Finance:
     print(f'Last day: {self._dates[-1]}, total days: {total_days}, i.e. ~{total_days / 365.:.2f} years')
     print(f'Amount paid: {self._init_amount - self._account.balance}')
 
+  def _calc_total_min_payments(self):
+    total_min_payment = Money(0.00)
+    for l in self._loans:
+      if l.bill_in_progress and l.total_owed > Money(0.00):
+        total_min_payment += l.min_payment 
+        
+    return total_min_payment  
+
+  def _create_observers(self, date_subject):
+    """
+    Create various observers of the date to synchonize 
+    billing, and loan interest accruing.
+    """
+    for l in self._loans:
+      date_subject.register(InterestAccruer(l)) # interest accrues before payment is made
+      date_subject.register(MinPaymentPayer(l, self._account))
+      #date_subject.register(InterestAccruer(l)) # interest accrues before payment is made
+
+
+      if not l.bill_in_progress:
+        date_subject.register(StartBillingObserver(l))
+
+      if not l.accruing:
+        date_subject.register(StartAccruingObserver(l))
+
   def run(self):
-    payment_per_month = 2118.79 # my rough monthly amount
+    payment_per_month = Money(2118.79) # my rough monthly amount
 
     loan_processor = LoanProcessor('etc/loans.csv')
     self._loans = loan_processor.create_loans()    
@@ -62,21 +89,21 @@ class Finance:
     self._totals = np.append(self._totals, float(total_owed_on_loans(self._loans)))
     
     current_date = DateSubject(self._today)
+    self._create_observers(current_date)
 
-    for l in self._loans:
-      min_payer = MinPaymentPayer(l, self._account)
-      current_date.register(min_payer)
+    high_interest_payment = payment_per_month - self._calc_total_min_payments()
+    print(f"Initial total monthly min payments: {self._calc_total_min_payments()}")
 
-      interest_accruer = InterestAccruer(l)
-      current_date.register(interest_accruer)
-
-    high_interest_payer = HighestInterestFirstPayer(self._loans, self._account, 1, Money(2000.00))
+    high_interest_payer = HighestInterestFirstPayer(self._loans, self._account, 1, high_interest_payment)
     current_date.register(high_interest_payer)
 
     for day in range(1,num_days+1):
 
       current_date.increment_day()
       self._dates.append(current_date.date)
+
+      # If more loans start to be billed, adjust amount paying on highest interest
+      high_interest_payer.amount = payment_per_month - self._calc_total_min_payments()
 
       self._totals = np.append(self._totals, float(total_owed_on_loans(self._loans)))
 

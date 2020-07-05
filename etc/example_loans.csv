@@ -1,4 +1,4 @@
-name, balance, interest rate, bill day, pay day, status, minimum payment, date accruing starts, date billing starts
-first, 5000.00, 5.0, 3, 10, in progress, 100.00, 9/30/2020, 9/30/2020
-second, 11000.00, 6.0, 15, 15, in progress, 120.00, 9/30/2020, 9/30/2020
-third, 25000.00, 8.0, 1, 1, forbearance, 200.00, 9/30/2020, 9/30/2020
+name, balance, interest rate, bill day, pay day, minimum payment, date accruing starts, date billing starts
+first, 5000.00, 5.0, 3, 10, 100.00, None, None
+second, 11000.00, 6.0, 15, 15, 120.00, None, None
+third, 25000.00, 8.0, 1, 1, 200.00, 09/30/2020, 09/30/2020

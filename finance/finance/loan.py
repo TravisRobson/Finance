@@ -5,6 +5,7 @@ import decimal
 
 from .money import Money
 
+
 class ExcessivePayment(Exception):
 
   def __init__(self, balance, accrued, amount):
@@ -66,10 +67,30 @@ class Loan:
   def accruing(self):
     return self._loan_info.accruing
 
+  @accruing.setter
+  def accruing(self, val):
+    self._loan_info.accruing = val
+
+  @property
+  def accrued_interest(self):
+    return self._accrued_interest
+  
   @property
   def bill_in_progress(self):
     return self._bill_info.in_progress
 
+  @bill_in_progress.setter
+  def bill_in_progress(self, val):
+    self._bill_info.in_progress = val
+  
+  @property
+  def bill_start_date(self):
+    return self._bill_info.start_date
+
+  @property
+  def accrue_start_date(self):
+    return self._loan_info.start_date
+  
   def _calc_daily_interest(self, year):
     num_days_in_year = 365
     if calendar.isleap(year):
@@ -91,18 +112,19 @@ class Loan:
     else:
       # you must pay on accrued interest first
       leftover = self._apply_to_accrued(amount)
-      if self._accrued_interest > 0.0: # i.e. still interest left to pay
+      if self._accrued_interest > 0.0 or not leftover: # i.e. still interest left to pay
         return
       else:
         self._loan_info.balance -= leftover
 
   def _apply_to_accrued(self, amount) -> None:
-    if amount <= self._accrued_interest:
+    accrued = self._accrued_interest
+    if amount <= accrued:
       self._accrued_interest -= amount
       return Money(0.00)
     else:
       self._accrued_interest = Money(0.00)
-      return amount - self._accrued_interest
+      return amount - accrued
 
   def convert_accrued_to_principal(self) -> None:
     self._loan_info.balance += round(self._accrued_interest, 2)

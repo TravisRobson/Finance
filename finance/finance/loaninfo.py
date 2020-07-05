@@ -5,7 +5,7 @@ from .money import Money
 
 class LoanInfo:
 
-  def __init__(self, balance, interest, accruing=True):
+  def __init__(self, balance, interest, accruing=True, start_date=None):
     """
     Interest rate is APR, assumed to be a percentage.
     """
@@ -17,6 +17,7 @@ class LoanInfo:
     self._balance = round(balance, 2) # Ensure balance is rounded to pennies.
     self._interest = interest
     self._accruing = accruing
+    self._start_date = start_date
 
   def __str__(self):
     return f"balance: {self._balance}, interest: {self._interest}, accruing: {self._accruing}"
@@ -39,5 +40,14 @@ class LoanInfo:
   @property
   def accruing(self):
     return self._accruing
+
+  @accruing.setter
+  def accruing(self, val):
+    self._accruing = val
+
+  @property
+  def start_date(self):
+    return self._start_date
+  
   
   

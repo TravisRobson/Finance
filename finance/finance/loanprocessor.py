@@ -1,5 +1,7 @@
 
 
+import datetime
+
 from .billinfo import BillInfo
 from .loan import Loan
 from .loaninfo import LoanInfo
@@ -23,28 +25,24 @@ class LoanProcessor:
     bill_day = datum['bill day']
     pay_day = datum['pay day']
     min_payment = float(datum['minimum payment'])
-    if datum['status'] == 'in progress':
-      bill_info = BillInfo(bill_day, min_payment)
-      loan_info = LoanInfo(balance, interest)
-    elif datum['status'] == 'forbearance':
-      bill_info = BillInfo(bill_day, min_payment, False)
-      loan_info = LoanInfo(balance, interest, False)
-    elif datum['status'] == 'deferred':
-      bill_info = BillInfo(bill_day, min_payment, False)
-      loan_info = LoanInfo(balance, interest)
-    else:
-      raise Exception(f"Invalid loan status in CSV file: {datum['status']}")
-    
-    try:
-      result = Loan(loan_info, bill_info)
-    except:
-      raise
 
-    return result
+    if datum['date billing starts'].strip() != 'None':
+      date = datetime.datetime.strptime(datum['date billing starts'], "%m/%d/%Y").date()
+      bill_info = BillInfo(bill_day, min_payment, False, date)
+    else:
+      bill_info = BillInfo(bill_day, min_payment)
+
+    if datum['date accruing starts'].strip() != 'None':
+      date = datetime.datetime.strptime(datum['date accruing starts'], "%m/%d/%Y").date()
+      loan_info = LoanInfo(balance, interest, False, date)
+    else:
+      loan_info = LoanInfo(balance, interest)
+    
+    return Loan(loan_info, bill_info)
 
   def create_loans(self):
     loans = []
     for datum in self._loan_data:
       loans.append(self._loan_datum_to_loan(datum))
 
-    return loans
+    return loans 
