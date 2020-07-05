@@ -34,6 +34,14 @@ class HighestInterestFirstPayer(Observer):
       total_owed += l.total_owed
     return total_owed
 
+  @property
+  def amount(self):
+    return self._amount
+  
+  @amount.setter
+  def amount(self, val):
+    self._amount = val
+
   def _get_bill_date(self, subject):
     """Get bill-cycle date in same month as datesubject."""
     tt = subject.date.timetuple()
@@ -64,11 +72,11 @@ class HighestInterestFirstPayer(Observer):
     bill_date = self._get_bill_date(subject)
     if bill_date == subject.date:
       nonzero_loans = [l for l in self._loans if l.total_owed != Money()]
-      accruing_loans = [l for l in self._loans if l.accruing]
+      accruing_loans = [l for l in nonzero_loans if l.accruing]
       amount_left = self._update_loans(accruing_loans, self._amount)
 
       if amount_left > Money(0.00):
-        nonacrruing_loans = [l for l in self._loans if not l.accruing]
+        nonacrruing_loans = [l for l in nonzero_loans if not l.accruing]
         self._update_loans(nonacrruing_loans, amount_left)
     
 

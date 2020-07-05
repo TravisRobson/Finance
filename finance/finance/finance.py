@@ -1,142 +1,114 @@
-#!/usr/bin/env python3
+
 
 import datetime
 import multiprocessing
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 from .account import Account
-from .billinfo import BillInfo
 from .datesubject import DateSubject
 from .highinterestpayer import HighestInterestFirstPayer
 from .interestaccruer import InterestAccruer
-from .loan import Loan
-from .loaninfo import LoanInfo
-from .loanreader import LoanReader
 from .loanutils import total_owed_on_loans
+from .loanprocessor import LoanProcessor
+from .startbilling import StartBillingObserver
+from .startaccruing import StartAccruingObserver
 from .minpayer import MinPaymentPayer
+from .moneydateplot import money_date_plot
 from .money import Money
-from .process import Process 
-
-
-def plot(dates, money):
-  fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
-
-  ax.plot(dates, money / 1000, ls="-")
-  ax.xaxis.set_major_formatter(mdates.DateFormatter('%b, %y'))
-  ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
-
-  ax.set_title('Total owed on student loans')
-  ax.set_xlabel('date')
-  ax.set_ylabel('Money (1000 USD)')
-  plt.gcf().autofmt_xdate()
-  plt.tight_layout()
-  plt.show()
 
 
 class Finance:
 
   def __init__(self, options):
-    self.options = options
-    self.process = Process()
+    self._options = options
+    self._init_amount = Money(100000.00) # The initial amount of money person has "in the bank."
+    self._account = Account(self._init_amount)
+    self._today = datetime.date.today()
+    self._dates = [] # dates of the simulation
+    self._totals = np.array([]) # float balance for all loans
+    self._loans = []
 
-  def loan_datum_to_loan(self, datum):
-    """Convert loanreader's data into Loan instances"""
-    balance = Money(datum['balance'])
-    interest = float(datum['interest rate'])
-    bill_day = datum['bill day']
-    pay_day = datum['pay day']
-    min_payment = float(datum['minimum payment'])
-    if datum['status'] == 'in progress':
-      bill_info = BillInfo(bill_day, min_payment)
-      loan_info = LoanInfo(balance, interest)
-    elif datum['status'] == 'forbearance':
-      bill_info = BillInfo(bill_day, min_payment, False)
-      loan_info = LoanInfo(balance, interest, False)
-    elif datum['status'] == 'deferred':
-      bill_info = BillInfo(bill_day, min_payment, False)
-      loan_info = LoanInfo(balance, interest)
-    else:
-      raise Exception(f"Invalid loan status in CSV file: {datum['status']}")
-    
-    try:
-      result = Loan(loan_info, bill_info)
-    except:
-      raise
+  def _display_results(self):
+    """
+    Display the figure of cumulative loan balance and some summary stats
+    as text to screen.
+    """
+    if not self._options.disable_figure:
+      proc = multiprocessing.Process(target=money_date_plot, args=(self._dates, self._totals))
+      proc.start()
 
-    return result
+    print(f'Ending total balance {total_owed_on_loans(self._loans)}')
+    total_days = (self._dates[-1] - self._today).days
+    print(f'Last day: {self._dates[-1]}, total days: {total_days}, i.e. ~{total_days / 365.:.2f} years')
+    print(f'Amount paid: {self._init_amount - self._account.balance}')
+
+  def _calc_total_min_payments(self):
+    total_min_payment = Money(0.00)
+    for l in self._loans:
+      if l.bill_in_progress and l.total_owed > Money(0.00):
+        total_min_payment += l.min_payment 
+        
+    return total_min_payment  
+
+  def _create_observers(self, date_subject):
+    """
+    Create various observers of the date to synchonize 
+    billing, and loan interest accruing.
+    """
+    for l in self._loans:
+      date_subject.register(InterestAccruer(l)) # interest accrues before payment is made
+      date_subject.register(MinPaymentPayer(l, self._account))
+      #date_subject.register(InterestAccruer(l)) # interest accrues before payment is made
+
+
+      if not l.bill_in_progress:
+        date_subject.register(StartBillingObserver(l))
+
+      if not l.accruing:
+        date_subject.register(StartAccruingObserver(l))
 
   def run(self):
-    """
-    """
-    initial_amount = Money(1000000.00)
-    account = Account(initial_amount)
+    payment_per_month = Money(self._options.monthly_pay) # my rough monthly amount
 
-    payment_per_month = 2118.79 # my rough monthly amount
+    loan_processor = LoanProcessor('etc/loans.csv')
+    self._loans = loan_processor.create_loans()    
 
-    loan_reader = LoanReader('etc/loans.csv')
-    # loan_reader = LoanReader('etc/example_loans.csv')
-    loan_data = loan_reader.read() # \todo need something to validate the data
-    
-    loans = []
-    for datum in loan_data:
-      loans.append(self.loan_datum_to_loan(datum))
-
-    total = total_owed_on_loans(loans)
-    print(f'Initial total balance {total}')
+    print(f'Initial total balance {total_owed_on_loans(self._loans)}')
 
     # End date will trump num_days
-    num_days = self.options.known.num_days
-    today = datetime.date.today()
-    if self.options.known.end_date:
-      end_date = datetime.datetime.strptime(self.options.known.end_date, '%b %d %Y')
-      num_days = (end_date - today).days
+    num_days = self._options.num_days
+
+    if self._options.end_date:
+      end_date = datetime.datetime.strptime(self._options.end_date, '%b %d %Y')
+      num_days = (end_date - self._today).days
 
     days = np.arange(0, num_days + 1, 1)
-    totals = np.array([])
 
-    dates = []
-    dates.append(today)
-    totals = np.append(totals, float(total_owed_on_loans(loans)))
+    self._dates.append(self._today)
+    self._totals = np.append(self._totals, float(total_owed_on_loans(self._loans)))
     
-    current_date = DateSubject(today)
+    current_date = DateSubject(self._today)
+    self._create_observers(current_date)
 
-    min_pay_loans = []
-    for l in loans:
-      min_pay_loans.append(MinPaymentPayer(l, account))
+    high_interest_payment = payment_per_month - self._calc_total_min_payments()
+    print(f"Initial total monthly min payments: {self._calc_total_min_payments()}")
 
-    for l in min_pay_loans:
-      current_date.register(l)
-
-    interest_accruers = []
-    for l in loans:
-      interest_accruers.append(InterestAccruer(l))
-
-    for l in interest_accruers:
-      current_date.register(l)
-
-    high_interest_payer = HighestInterestFirstPayer(loans, account, 1, Money(2000.00))
+    high_interest_payer = HighestInterestFirstPayer(self._loans, self._account, 1, high_interest_payment)
     current_date.register(high_interest_payer)
 
     for day in range(1,num_days+1):
 
       current_date.increment_day()
-      dates.append(current_date.date)
+      self._dates.append(current_date.date)
 
-      totals = np.append(totals, float(total_owed_on_loans(loans)))
+      # If more loans start to be billed, adjust amount paying on highest interest
+      high_interest_payer.amount = payment_per_month - self._calc_total_min_payments()
 
-      if total_owed_on_loans(loans) == Money(0.00):
+      self._totals = np.append(self._totals, float(total_owed_on_loans(self._loans)))
+
+      if total_owed_on_loans(self._loans) == Money(0.00):
         break
 
+    self._display_results()
 
-
-    if not self.options.known.disable_figure:
-      proc = multiprocessing.Process(target=plot, args=(dates, totals))
-      proc.start()
-
-    print(f'Ending total balance {total_owed_on_loans(loans)}')
-    total_days = (dates[-1] - today).days
-    print(f'Last day: {dates[-1]}, total days: {total_days}, i.e. ~{total_days/365.:.2f} years')
-    print(f'Amount paid: {initial_amount-account.balance}')

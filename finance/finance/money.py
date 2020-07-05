@@ -1,23 +1,20 @@
-#!/usr/bin/env python3
 
 
-from random import uniform
-import pytest
 
 from decimal import Decimal, ROUND_HALF_UP
 
 
-def almost_equal(a, b):
+def almost_equal(a, b, tol=1.0e-3):
   assert isinstance(a, Money)
   assert isinstance(b, Money)
-  return abs(a - b) < 1.0e-3
+  return abs(a - b) < tol
   
 
 class Money:
 
   def __init__(self, amount=None):
     if isinstance(amount, Decimal):
-      self._amount = amount or 0
+      self._amount = amount or Decimal(0)
     else:
       self._amount = Decimal(amount or 0)
 
@@ -59,8 +56,9 @@ class Money:
   def __abs__(self):
     return Money(amount = abs(self._amount))
 
-  def __round__(self, n):
+  def __round__(self, n=2):
     """todo Is this how I wish to round things?"""
+    dec = str(pow(1.0, -n))
     rounded_amount = self._amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
     return Money(amount = rounded_amount)
 
