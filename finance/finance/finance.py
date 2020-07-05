@@ -69,7 +69,7 @@ class Finance:
         date_subject.register(StartAccruingObserver(l))
 
   def run(self):
-    payment_per_month = Money(2118.79) # my rough monthly amount
+    payment_per_month = Money(self._options.monthly_pay) # my rough monthly amount
 
     loan_processor = LoanProcessor('etc/loans.csv')
     self._loans = loan_processor.create_loans()    
