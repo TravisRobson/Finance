@@ -4,8 +4,7 @@ import datetime
 import multiprocessing
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+
 
 from .account import Account
 from .billinfo import BillInfo
@@ -17,23 +16,9 @@ from .loaninfo import LoanInfo
 from .loanreader import LoanReader
 from .loanutils import total_owed_on_loans
 from .minpayer import MinPaymentPayer
+from .moneydateplot import money_date_plot
 from .money import Money
 from .process import Process 
-
-
-def plot(dates, money):
-  fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
-
-  ax.plot(dates, money / 1000, ls="-")
-  ax.xaxis.set_major_formatter(mdates.DateFormatter('%b, %y'))
-  ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
-
-  ax.set_title('Total owed on student loans')
-  ax.set_xlabel('date')
-  ax.set_ylabel('Money (1000 USD)')
-  plt.gcf().autofmt_xdate()
-  plt.tight_layout()
-  plt.show()
 
 
 class Finance:
@@ -130,10 +115,8 @@ class Finance:
       if total_owed_on_loans(loans) == Money(0.00):
         break
 
-
-
     if not self.options.known.disable_figure:
-      proc = multiprocessing.Process(target=plot, args=(dates, totals))
+      proc = multiprocessing.Process(target=money_date_plot, args=(dates, totals))
       proc.start()
 
     print(f'Ending total balance {total_owed_on_loans(loans)}')
