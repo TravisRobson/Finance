@@ -12,4 +12,4 @@ def test_dummy():
 
   for l in contents[section]:
     print(l)
-  assert False
+  assert True

@@ -109,23 +109,24 @@ class Loan:
     """
     if amount > self.total_owed:
       raise ExcessivePayment(self.balance, self.accrued_interest, amount)
-    else:
-      # you must pay on accrued interest first
-      leftover = self._apply_to_accrued(amount)
-      if self._accrued_interest > 0.0 or not leftover: # i.e. still interest left to pay
-        return
-      else:
-        self._loan_info.balance -= leftover
+
+    leftover = self._apply_to_accrued(amount) # you must pay on accrued interest first
+
+    if leftover and not self._accrued_interest:
+      self._loan_info.balance -= leftover
+      self._loan_info.balance = round(self._loan_info.balance)
 
   def _apply_to_accrued(self, amount) -> None:
     accrued = self._accrued_interest
     if amount <= accrued:
       self._accrued_interest -= amount
+      self._accrued_interest = round(self._accrued_interest)
       return Money(0.00)
     else:
       self._accrued_interest = Money(0.00)
-      return amount - accrued
+      return round(amount - accrued)
 
   def convert_accrued_to_principal(self) -> None:
-    self._loan_info.balance += round(self._accrued_interest, 2)
+    self._loan_info.balance += self._accrued_interest
+    self._loan_info.balance = round(self._loan_info.balance)
     self._accrued_interest = Money(0.00)

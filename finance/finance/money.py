@@ -17,7 +17,7 @@ class Money:
 
   def __init__(self, amount=None):
     if isinstance(amount, Decimal):
-      self._amount = amount or 0
+      self._amount = amount or Decimal(0)
     else:
       self._amount = Decimal(amount or 0)
 
@@ -59,7 +59,7 @@ class Money:
   def __abs__(self):
     return Money(amount = abs(self._amount))
 
-  def __round__(self, n):
+  def __round__(self, n=2):
     """todo Is this how I wish to round things?"""
     rounded_amount = self._amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
     return Money(amount = rounded_amount)
