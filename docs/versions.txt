@@ -1,4 +1,4 @@
-1.0 -- beta
+0.1 -- beta
     [#1] -- Initial unit test created.
     [#2] -- Fundamental money class
     [#4] -- Loan class, simple daily interest

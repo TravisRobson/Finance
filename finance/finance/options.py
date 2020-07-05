@@ -17,10 +17,22 @@ class Options:
     self.parser.add_argument('-e', '--end-date', type=str, default='', help='End date of simulation')
     self.parser.add_argument('-d', '--disable-figure', action='store_true', help='Do not display Matplotlib images')
 
+  @property
+  def num_days(self):
+    return self._known.num_days
+  
+  @property
+  def end_date(self):
+    return self._known.end_date
 
+  @property
+  def disable_figure(self):
+    return self._known.disable_figure
+  
+  
   def parse(self, args=None):
     """Parse known options, uknown options are ignored"""
-    self.known, self.unknown = self.parser.parse_known_args(args)[:]
+    self._known, self._unknown = self.parser.parse_known_args(args)[:]
 
-    if len(self.unknown) != 0:
-      print(f'Warning, unknown arguments received {self.unknown}')
+    if len(self._unknown) != 0:
+      print(f'Warning, unknown arguments received {self._unknown}')

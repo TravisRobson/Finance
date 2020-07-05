@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 
 import csv
@@ -29,6 +28,7 @@ class LoanReader:
     self.strip_keys()
 
     return self._loans
+
 
 
 
