@@ -61,6 +61,7 @@ class Money:
 
   def __round__(self, n=2):
     """todo Is this how I wish to round things?"""
+    dec = str(pow(1.0, -n))
     rounded_amount = self._amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
     return Money(amount = rounded_amount)
 
