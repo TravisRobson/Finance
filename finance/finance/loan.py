@@ -124,7 +124,7 @@ class Loan:
       return Money(0.00)
     else:
       self._accrued_interest = Money(0.00)
-      return round(amount - accrued)
+      return amount - accrued
 
   def convert_accrued_to_principal(self) -> None:
     self._loan_info.balance += self._accrued_interest

@@ -1,16 +1,13 @@
-#!/usr/bin/env python3
 
 
-from random import uniform
-import pytest
 
 from decimal import Decimal, ROUND_HALF_UP
 
 
-def almost_equal(a, b):
+def almost_equal(a, b, tol=1.0e-3):
   assert isinstance(a, Money)
   assert isinstance(b, Money)
-  return abs(a - b) < 1.0e-3
+  return abs(a - b) < tol
   
 
 class Money:
