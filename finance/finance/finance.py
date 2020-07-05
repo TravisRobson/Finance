@@ -1,19 +1,14 @@
-#!/usr/bin/env python3
+
 
 import datetime
 import multiprocessing
 
 import numpy as np
 
-
 from .account import Account
-from .billinfo import BillInfo
 from .datesubject import DateSubject
 from .highinterestpayer import HighestInterestFirstPayer
 from .interestaccruer import InterestAccruer
-from .loan import Loan
-from .loaninfo import LoanInfo
-from .loanreader import LoanReader
 from .loanutils import total_owed_on_loans
 from .loanprocessor import LoanProcessor
 from .minpayer import MinPaymentPayer
@@ -68,19 +63,12 @@ class Finance:
     
     current_date = DateSubject(self._today)
 
-    min_pay_loans = []
     for l in self._loans:
-      min_pay_loans.append(MinPaymentPayer(l, self._account))
+      min_payer = MinPaymentPayer(l, self._account)
+      current_date.register(min_payer)
 
-    for l in min_pay_loans:
-      current_date.register(l)
-
-    interest_accruers = []
-    for l in self._loans:
-      interest_accruers.append(InterestAccruer(l))
-
-    for l in interest_accruers:
-      current_date.register(l)
+      interest_accruer = InterestAccruer(l)
+      current_date.register(interest_accruer)
 
     high_interest_payer = HighestInterestFirstPayer(self._loans, self._account, 1, Money(2000.00))
     current_date.register(high_interest_payer)

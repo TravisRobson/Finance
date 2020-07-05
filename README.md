@@ -9,6 +9,12 @@ Including multiple payment strategies such as strictly minimum payments or
 minimum payment as well as paying extra on highest interest loans first 
 (the optimal allocation of your payments).
 
+To run the CLI
+```bash
+./bin/finance.sh <options>
+```
+where you can pass the option `--help` to see your options.
+
 ## Goals
 
 I would like expand this application past student loan payments. I would like to estimate
@@ -25,4 +31,9 @@ pip install -r requirements.txt
 ```
 
 To deactivate `$ deactivate`.
+
+To run the test suite execute
+```bash
+./bin/runTests.sh
+```
 
