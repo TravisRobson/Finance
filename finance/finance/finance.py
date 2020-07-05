@@ -21,15 +21,15 @@ from .money import Money
 from .process import Process 
 
 
-def plot(x, y):
+def plot(dates, money):
   fig, ax = plt.subplots(figsize=(4, 3), dpi=150)
 
-  ax.plot(x, y / 1000, ls="-")
+  ax.plot(dates, money / 1000, ls="-")
   ax.xaxis.set_major_formatter(mdates.DateFormatter('%b, %y'))
   ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
 
   ax.set_title('Total owed on student loans')
-  ax.set_xlabel('days')
+  ax.set_xlabel('date')
   ax.set_ylabel('Money (1000 USD)')
   plt.gcf().autofmt_xdate()
   plt.tight_layout()
@@ -74,6 +74,8 @@ class Finance:
     initial_amount = Money(1000000.00)
     account = Account(initial_amount)
 
+    payment_per_month = 2118.79 # my rough monthly amount
+
     loan_reader = LoanReader('etc/loans.csv')
     # loan_reader = LoanReader('etc/example_loans.csv')
     loan_data = loan_reader.read() # \todo need something to validate the data
@@ -83,7 +85,7 @@ class Finance:
       loans.append(self.loan_datum_to_loan(datum))
 
     total = total_owed_on_loans(loans)
-    print(f'Total balance {total}')
+    print(f'Initial total balance {total}')
 
     # End date will trump num_days
     num_days = self.options.known.num_days
@@ -134,7 +136,7 @@ class Finance:
       proc = multiprocessing.Process(target=plot, args=(dates, totals))
       proc.start()
 
-    print(f'Total balance {total_owed_on_loans(loans)}')
+    print(f'Ending total balance {total_owed_on_loans(loans)}')
     total_days = (dates[-1] - today).days
     print(f'Last day: {dates[-1]}, total days: {total_days}, i.e. ~{total_days/365.:.2f} years')
     print(f'Amount paid: {initial_amount-account.balance}')

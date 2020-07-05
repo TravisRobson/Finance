@@ -171,22 +171,32 @@ def test_multiple_loans_highest_interest_first(current_date):
   assert loans[2].balance == init_loans[2].balance - Money(50.00)
 
 
-# def test_highest_interest_accruing(current_date):
-#   """
-#   If there are multiple loans, it's the highest interest loans who
-#   are accruing that are addressed first.
-#   """
-#   assert False
+def test_highest_interest_accruing(current_date):
+  """
+  If there are multiple loans, it's the highest interest loans who
+  are accruing that are addressed first.
+  """
+  init_account_balance = Money(10000.00)
+  account = Account(init_account_balance)
 
+  init_loans = []
+  init_loan_balance = Money(100.00)
+  bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
+  loan_info = LoanInfo(init_loan_balance, interest=1.00, accruing=False)  
+  init_loans.append(Loan(loan_info, bill_info))
 
-# def test_nonaccruing(current_date):
-#   """
-#   If all accruing loans have been paid off, the highest interest nonaccruing
-#   loans begin to get paid down.
-#   """
-#   assert False
+  loan_info = LoanInfo(init_loan_balance, interest=1.00)  
+  init_loans.append(Loan(loan_info, bill_info)) 
 
+  loans = copy.deepcopy(init_loans)
 
+  payer = HighestInterestFirstPayer(loans, account, next_day(current_date.date), Money(50.00))
 
+  current_date.register(payer)
+  current_date.increment_day() 
 
+  # first loan, nonaccruing, should not have a changed balance   
+  assert loans[0].balance == init_loans[0].balance
 
+  # second loan should have a decreased balance
+  assert loans[1].balance + Money(50.00) == init_loans[1].balance
