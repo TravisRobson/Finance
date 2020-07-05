@@ -24,12 +24,24 @@ class Subject(abc.ABC):
 class DateSubject(Subject):
 
   def __init__(self, date):
+    
     self._date = date
     self._observers = []
+
+  def __str__(self):
+    return f"{self._date}"
+
+  def __repr__(self):
+    return str(self)
 
   @property
   def date(self):
     return self._date
+
+  @property
+  def year(self):
+    return self._date.year
+  
 
   def increment_day(self):
     self._date += datetime.timedelta(days=1)

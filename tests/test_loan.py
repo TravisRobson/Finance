@@ -8,24 +8,18 @@ from random import randint
 
 import pytest
 
+from finance.finance.billinfo import BillInfo
+from finance.finance.loaninfo import LoanInfo
 from finance.finance.money import Money, almost_equal
-from finance.finance.loan import Loan, InvalidLoanBalance
-
-
-@pytest.mark.parametrize("balance", [
-  (Money(0.00)),
-  (Money(-10.00)),
-])
-def test_init_raise_exception_invalid_balance(balance):
-  """Loans cannot have non-positive balances"""
-  with pytest.raises(InvalidLoanBalance):
-    loan = Loan(balance, 0.00, 1, 1)
+from finance.finance.loan import Loan
 
 
 @pytest.fixture
 def zero_accured_loan():
   """Return a loan with zero accrued interest with 1% interest rate (APR)"""
-  return Loan(Money(100.00), interest=1.00, bill_day=1, pay_day=1)
+  bill_info = BillInfo(day=1, amount=Money())
+  loan_info = LoanInfo(Money(100.00), interest=1.00)
+  return Loan(loan_info, bill_info)
 
 
 @pytest.mark.parametrize("amount, expected", [
@@ -33,9 +27,9 @@ def zero_accured_loan():
   (Money(5.00), Money(95.00)),
   (Money(67), Money(33))
 ])
-def test_apply_money(zero_accured_loan, amount, expected):
+def test_make_payment(zero_accured_loan, amount, expected):
   """If you apply $1 to a loan, its balance should descrease by $1"""
-  zero_accured_loan.apply_money(amount)
+  zero_accured_loan.make_payment(amount)
   assert zero_accured_loan.balance == expected
 
 
@@ -60,7 +54,7 @@ def test_convert_accrued_to_principal(zero_accured_loan, num_days):
   """
   for i in range(num_days):
     zero_accured_loan.accrue_daily(2024)
-  total_owed = zero_accured_loan.total_owed
+  total_owed = round(zero_accured_loan.total_owed, 2)
   zero_accured_loan.convert_accrued_to_principal()
   assert total_owed == zero_accured_loan.total_owed
   assert total_owed == zero_accured_loan.balance
