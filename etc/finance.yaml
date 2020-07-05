@@ -1,6 +1,3 @@
---- 
-
-# CLI defaults
-cli_map:
- num_days: 300
- monthly_pay: 2,000.00
+--- !CliDefaults
+num_days: 300
+monthly_pay: 2000.00
