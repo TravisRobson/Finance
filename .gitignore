@@ -1,6 +1,7 @@
 etc/loans.csv
+etc/payers.csv
 myvenv/
-etc/user.yaml
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
