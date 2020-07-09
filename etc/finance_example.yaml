@@ -1,0 +1,13 @@
+date: 06-23-2020
+
+loans:
+  - name: Example Loan 1
+    loan info:
+      balance: 10000.00 # Balance left to be paid on loan
+      interest: 4.8     # APR (Annual Percentage Rate)
+    bill info:
+      day: 7            # day of the month you receive the bill
+      amount: 123.45    # monthly bill amount  
+
+payers:
+  - name: Example Payer 1

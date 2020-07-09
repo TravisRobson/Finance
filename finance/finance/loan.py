@@ -34,14 +34,15 @@ class Loan:
 
   def __str__(self):
     msg = (
-      f"loan info: {self._loan_info}, "
-      f"accrued interest: {self._accrued_interest}, "
-      f"bill info: {self._bill_info}, "
+      f"{self.__class__.__name__}("
+      f"loan_info={self._loan_info}, "
+      f"bill_info={self._bill_info}, "
+      f"accrued_interest={self._accrued_interest})"
     )
     return msg
  
   def __repr__(self):
-    return f"{self.__class__.__name__}({repr(self._loan_info)}, {repr(self._bill_info)}, {repr(self._accrued_interest)})"
+    return str(self)
 
   @property
   def balance(self):
