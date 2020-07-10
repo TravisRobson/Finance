@@ -1,5 +1,13 @@
 
 
+class FinanceError(Exception):
+  """All exceptions raise from my code will inherit from this"""
+  def __init__(self, msg=None):
+    if msg is None:
+      msg = "An error occured in the Finance code"
+      super(FinanceError, self).__int__(msg)
+      
+
 class InvalidBillDayOfMonth(Exception):
 
   def __init__(self, value):
