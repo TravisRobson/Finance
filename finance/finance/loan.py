@@ -3,6 +3,9 @@
 import calendar
 import decimal
 
+from .billinfo import BillInfo
+from .loaninfo import LoanInfo
+from .dataparser import ParserError
 from .money import Money
 
 
@@ -131,3 +134,40 @@ class Loan:
     self._loan_info.balance += self._accrued_interest
     self._loan_info.balance = round(self._loan_info.balance)
     self._accrued_interest = Money(0.00)
+
+
+def call_with_non_none_args(func, *args, **kwargs):
+  kwargs_not_none = {k: v for k, v in kwargs.items() if v is not None}
+  return func(*args, **kwargs_not_none)
+
+
+def create_loan_info(data_dict):
+  """From dataparser.py data dictionary create a LoanInfo instance"""
+  if 'balance' not in data_dict:
+    raise ParserError('balance')
+  if 'interest' not in data_dict:
+    raise ParserError('interest')
+
+  return call_with_non_none_args(LoanInfo,
+    balance=data_dict['balance'], interest=data_dict['interest'], start_date=data_dict.get('start_date', None))
+
+
+def create_bill_info(data_dict):
+  """From dataparser.py data dictionary create a BillInfo instance"""
+  return BillInfo(data_dict['day'], data_dict['amount'])
+
+
+def create_loan(data_dict):
+  """
+  dataparser.py will parse the data file to create a dictionary of data 
+  which this function turns into a loan.
+  """
+  loans = []
+  for d in data_dict:
+    loan_info_data = d['loan info']
+    bill_info_data = d['bill info']
+
+    loans.append(Loan(create_loan_info(loan_info_data), create_bill_info(bill_info_data)))
+
+  return loans
+

@@ -10,15 +10,17 @@ class ParserError(FinanceError, KeyError):
   def __init__(self, key):
     super(FinanceError, self).__init__(f'Expected YAML list: {key}')
     self.key = key
-    
+
 
 def parse(file):
-
+  """
+  Parse the data file (YAML format). Create dictionaries
+  for each data type we could expect. If they don't exist
+  return none.
+  """
   data = yaml.load(file, Loader=yaml.FullLoader)
 
-  try:
-    loan_data = data['loans']
-  except KeyError as err:
-    raise ParserError('loans')
+  loan_data = data.get('loans', None)
+  payer_data = data.get('payers', None)
 
-  return loan_data
+  return loan_data, payer_data
