@@ -6,7 +6,6 @@ from .money import Money
 
 class BillInfo():
   """Data about billing on a loan"""
-  # def __init__(self, day, amount, in_progress=True, start_date=None):
   def __init__(self, day, amount, start_date=None):
     """
     If there is no start date provided the loan is assume to already be 
@@ -20,7 +19,6 @@ class BillInfo():
 
     self._day = int(day) # day the minimum payment is due
     self._amount = amount # min payment of a loan
-    # self._in_progress = in_progress # Is the bill being collected or is loan in deferrment?
     self._start_date = start_date
 
   def __repr__(self):
@@ -32,7 +30,6 @@ class BillInfo():
     )
     return msg 
 
-  @property
   def billing(self, date):
     result = True
     if self._start_date:

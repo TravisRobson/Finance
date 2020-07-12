@@ -38,6 +38,5 @@ def create_account(data_dict):
   """From dataparser.py data dictionary create a Account instance"""
   if 'balance' not in data_dict:
     raise ParserError('balance')
-  if 'interest' not in data_dict:
-    raise ParserError('interest')
+    
   return Account(data_dict['balance'])

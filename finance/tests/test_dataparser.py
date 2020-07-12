@@ -1,7 +1,7 @@
 
 
 from finance.finance.billinfo import BillInfo
-from finance.finance.loan import Loan, create_loan
+from finance.finance.loan import Loan, create_loans
 from finance.finance.loaninfo import LoanInfo
 from finance.finance.money import Money
 import finance.finance.dataparser as parser

@@ -19,10 +19,10 @@ def current_date():
   return DateSubject(date)
 
 
-def create_loan(accruing=True):
+def create_loan(accrue_start_date=None):
   # create loan where minimum payment is the day after ptest fixture's date.
   bill_info = BillInfo(day=20, amount=Money(1.00)) 
-  loan_info = LoanInfo(Money(10000.00), interest=1.00, accruing=accruing)
+  loan_info = LoanInfo(Money(10000.00), interest=1.00, start_date=accrue_start_date)
 
   return Loan(loan_info, bill_info)  
 
@@ -32,7 +32,8 @@ def test_not_accruing(current_date):
   A loan that is not accruing should not chnage the total_owed
   of the loan.
   """
-  loan = create_loan(False) 
+  accrue_start_date = current_date.date + datetime.timedelta(days=100)
+  loan = create_loan(accrue_start_date) 
 
   intial_owed = loan.total_owed
 

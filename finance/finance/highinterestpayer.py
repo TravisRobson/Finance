@@ -72,11 +72,11 @@ class HighestInterestFirstPayer(Observer):
     bill_date = self._get_bill_date(subject)
     if bill_date == subject.date:
       nonzero_loans = [l for l in self._loans if l.total_owed != Money()]
-      accruing_loans = [l for l in nonzero_loans if l.accruing]
+      accruing_loans = [l for l in nonzero_loans if l.accruing(subject.date)]
       amount_left = self._update_loans(accruing_loans, self._amount)
 
       if amount_left > Money(0.00):
-        nonacrruing_loans = [l for l in nonzero_loans if not l.accruing]
+        nonacrruing_loans = [l for l in nonzero_loans if not l.accruing(subject.date)]
         self._update_loans(nonacrruing_loans, amount_left)
     
 
