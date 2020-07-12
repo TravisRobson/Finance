@@ -37,3 +37,7 @@ To run the test suite execute
 ./bin/runTests.sh
 ```
 
+## References
+
+https://stackoverflow.com/questions/7560455/decimals-to-2-places-for-money-in-python-3
+
