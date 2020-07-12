@@ -25,7 +25,7 @@ class MinPaymentPayer(Observer):
 
   def update(self, subject):
     """When date is incremented by a date, this function is called."""
-    if self._loan.total_owed and self._loan.bill_in_progress:
+    if self._loan.total_owed and self._loan.billing(subject.date):
       bill_date = self._get_bill_date(subject) 
 
       if bill_date == subject.date:

@@ -4,12 +4,11 @@ from .exceptions import FinanceError
 
 import yaml
 
+class ParserError(FinanceError):
 
-class ParserError(FinanceError, KeyError):
-  """If there is an error while parsing"""
   def __init__(self, key):
-    super(FinanceError, self).__init__(f'Expected YAML list: {key}')
-    self.key = key
+    super(ParserError, self).__init__("YAML data file expected key: {key}")
+    self._key = key
 
 
 def parse(file):
@@ -29,10 +28,6 @@ def get_loans_data(data):
 def get_payers_data(data):
   """Get data needed to characterize payment schemes"""
   return data.get('payers', None)
-
-
-# def get_loans_monthly_payment(data):
-#   return data.get('loans monthly payment', None)
 
 
 def get_start_date(data):

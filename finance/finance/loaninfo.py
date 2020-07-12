@@ -22,10 +22,10 @@ class LoanInfo:
   def __repr__(self):
     msg = (
       f"{self.__class__.__name__}("
-      f"balance: {self._balance}, "
-      f"interest: {self._interest}, "
-      f"accruing: {self._accruing}, "
-      f"start date: {self._start_date})"
+      f"balance={self._balance}, "
+      f"interest={self._interest}, "
+      f"accruing={self._accruing}, "
+      f"start date={self._start_date})"
     )
     return msg
 
@@ -52,6 +52,22 @@ class LoanInfo:
   @property
   def start_date(self):
     return self._start_date
+
+
+def call_with_non_none_args(func, *args, **kwargs):
+  kwargs_not_none = {k: v for k, v in kwargs.items() if v is not None}
+  return func(*args, **kwargs_not_none)
+
+
+def create_loan_info(data_dict):
+  """From dataparser.py data dictionary create a LoanInfo instance"""
+  if 'balance' not in data_dict:
+    raise ParserError('balance')
+  if 'interest' not in data_dict:
+    raise ParserError('interest')
+
+  return call_with_non_none_args(LoanInfo,
+    balance=data_dict['balance'], interest=data_dict['interest'], start_date=data_dict.get('start_date', None))
   
   
   

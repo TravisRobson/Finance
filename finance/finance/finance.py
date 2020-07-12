@@ -60,22 +60,24 @@ class Finance:
 
   def _create_observers(self, date_subject):
     """
-    Create various observers of the date to synchonize 
-    billing and loan interest accruing.
+    Create various observers of the date to synchonize billing and loan 
+    interest accruing.
     """
     for l in self._loans:
-      date_subject.register(InterestAccruer(l)) # interest accrues before payment is made
+      # interest accrues before payment is made
+      date_subject.register(InterestAccruer(l)) 
       date_subject.register(MinPaymentPayer(l, self._account))
 
-      if not l.bill_in_progress:
-        date_subject.register(StartBillingObserver(l))
+      # if not l.bill_in_progress:
+      #   date_subject.register(StartBillingObserver(l))
 
-      if not l.accruing:
-        date_subject.register(StartAccruingObserver(l))
+      # if not l.accruing:
+      #   date_subject.register(StartAccruingObserver(l))
 
   def _read_loans_data(self, data):
     loan_data = parser.get_loans_data(data)
-    self._loans = loan.create_loans(loan_data)
+    if loan_data: 
+      self._loans = loan.create_loans(loan_data)
     print(f'Initial total balance {total_owed_on_loans(self._loans)}')
 
   def _read_start_date_data(self, data):
@@ -95,9 +97,6 @@ class Finance:
       self._read_loans_data(data)
       self._read_start_date_data(data)
       self._read_account_data(data)
-
-      #monthly_pay  = self._options.monthly_pay or parser.get_loans_monthly_payment(data)
-      # self._payment_per_month = Money(monthly_pay) 
 
   def initialize(self):
     self._read_data_file()
@@ -128,6 +127,7 @@ class Finance:
     totals = np.array([float(total_owed_on_loans(self._loans))])
 
     date_subject = DateSubject(self._start_date) # the date of the update loop
+    self._create_observers(date_subject)
 
     while not self._stop(date_subject.date):
       date_subject.increment_day()

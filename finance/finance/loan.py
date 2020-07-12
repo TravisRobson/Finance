@@ -3,26 +3,24 @@
 import calendar
 import decimal
 
-from .billinfo import BillInfo
-from .loaninfo import LoanInfo
+from .billinfo import BillInfo, create_bill_info
+from .exceptions import FinanceError
+from .loaninfo import LoanInfo, create_loan_info
 from .dataparser import ParserError
 from .money import Money
 
 
-class ExcessivePayment(Exception):
+class ExcessivePaymentError(FinanceError):
 
   def __init__(self, balance, accrued, amount):
+    msg = (
+      f"Excessive payment of {amount} on loan with balance {balance} and "
+      f"accrued interest {accrued}"
+    )
+    super(ExcessivePaymentError, self).__init__(msg)
     self._balance = balance
     self._accrued = accrued
     self._amount = amount
-
-  def __str__(self):
-    msg = (
-      f"Amounted to pay {self._amount} on loan "
-      f"with balance {self._balance}, "
-      f"and accrued interest {self._accrued}"
-    )
-    return msg
 
 
 class Loan: 
@@ -79,13 +77,8 @@ class Loan:
   def accrued_interest(self):
     return self._accrued_interest
   
-  @property
-  def bill_in_progress(self):
-    return self._bill_info.in_progress
-
-  @bill_in_progress.setter
-  def bill_in_progress(self, val):
-    self._bill_info.in_progress = val
+  def billing(self, date):
+    return self._bill_info.billing(date)
   
   @property
   def bill_start_date(self):
@@ -112,7 +105,7 @@ class Loan:
     than what is owed.
     """
     if amount > self.total_owed:
-      raise ExcessivePayment(self.balance, self.accrued_interest, amount)
+      raise ExcessivePaymentError(self.balance, self.accrued_interest, amount)
 
     leftover = self._apply_to_accrued(amount) # you must pay on accrued interest first
 
@@ -136,27 +129,6 @@ class Loan:
     self._accrued_interest = Money(0.00)
 
 
-def call_with_non_none_args(func, *args, **kwargs):
-  kwargs_not_none = {k: v for k, v in kwargs.items() if v is not None}
-  return func(*args, **kwargs_not_none)
-
-
-def create_loan_info(data_dict):
-  """From dataparser.py data dictionary create a LoanInfo instance"""
-  if 'balance' not in data_dict:
-    raise ParserError('balance')
-  if 'interest' not in data_dict:
-    raise ParserError('interest')
-
-  return call_with_non_none_args(LoanInfo,
-    balance=data_dict['balance'], interest=data_dict['interest'], start_date=data_dict.get('start_date', None))
-
-
-def create_bill_info(data_dict):
-  """From dataparser.py data dictionary create a BillInfo instance"""
-  return BillInfo(data_dict['day'], data_dict['amount'])
-
-
 def create_loans(data_dict):
   """
   dataparser.py will parse the data file to create a dictionary of data 
@@ -164,7 +136,11 @@ def create_loans(data_dict):
   """
   loans = []
   for d in data_dict:
-    #print(d)
+    if 'loan info' not in d:
+      raise ParserError('loan info')
+    if 'bill info' not in d:
+      raise ParserError('bill info')
+
     loan_info_data = d['loan info']
     bill_info_data = d['bill info']
 

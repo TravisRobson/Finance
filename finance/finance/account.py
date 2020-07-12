@@ -1,10 +1,16 @@
 
 
 from .money import Money
+from .exceptions import FinanceError
 
 
-class InsufficientFunds(Exception):
-  pass
+class InsufficientFundsError(FinanceError):
+
+  def __init__(self, balance, amount):
+    msg = f"Account balance {balance} insufficient for requested amount {amount}"
+    super(InsufficientFundsError, self).__init__(msg)
+    self.balance = balance
+    self.amount = amount
 
 
 class Account:
@@ -23,11 +29,15 @@ class Account:
   
   def remove_money(self, amount):
     if amount > self._balance:
-      raise InsufficientFunds
+      raise InsufficientFundsError(self._balance, amount)
     else:
       self._balance -= amount
 
 
 def create_account(data_dict):
   """From dataparser.py data dictionary create a Account instance"""
+  if 'balance' not in data_dict:
+    raise ParserError('balance')
+  if 'interest' not in data_dict:
+    raise ParserError('interest')
   return Account(data_dict['balance'])
