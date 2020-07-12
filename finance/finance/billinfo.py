@@ -22,7 +22,7 @@ class BillInfo():
     self._start_date = start_date
 
   def __str__(self):
-    return f"Bill day: {self._day}, amount: {self._amount}, in progress: {self._in_progress}"
+    return f"{self.__class__.__name__}(day: {self._day}, amount: {self._amount}, in progress: {self._in_progress})"
 
   def __repr__(self):
     return f"{repr(self._day)}, {repr(self._amount)}, {repr(self._in_progress)}"

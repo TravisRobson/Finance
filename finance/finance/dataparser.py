@@ -18,9 +18,27 @@ def parse(file):
   for each data type we could expect. If they don't exist
   return none.
   """
-  data = yaml.load(file, Loader=yaml.FullLoader)
+  return yaml.load(file, Loader=yaml.FullLoader)
 
-  loan_data = data.get('loans', None)
-  payer_data = data.get('payers', None)
 
-  return loan_data, payer_data
+def get_loans_data(data):
+  """Get data needed to characterize loans"""
+  return data.get('loans', None)
+
+
+def get_payers_data(data):
+  """Get data needed to characterize payment schemes"""
+  return data.get('payers', None)
+
+
+# def get_loans_monthly_payment(data):
+#   return data.get('loans monthly payment', None)
+
+
+def get_start_date(data):
+  return data.get('date modified', None)
+
+
+def get_account_data(data):
+  """Currently singular"""
+  return data.get('account', None)

@@ -1,4 +1,8 @@
-date: 06-23-2020
+# This file will serve as the UI. If I were to make a proper application
+# this data would be fed in via a GUI and stored in a database.
+
+date modified: 06-23-2020     # The date the simulation should start from
+loans monthly payment: 500.00 # total amount user wishes to pay on loans total, monthly
 
 loans:
   - name: Example Loan 1

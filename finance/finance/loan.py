@@ -157,13 +157,14 @@ def create_bill_info(data_dict):
   return BillInfo(data_dict['day'], data_dict['amount'])
 
 
-def create_loan(data_dict):
+def create_loans(data_dict):
   """
   dataparser.py will parse the data file to create a dictionary of data 
   which this function turns into a loan.
   """
   loans = []
   for d in data_dict:
+    #print(d)
     loan_info_data = d['loan info']
     bill_info_data = d['bill info']
 

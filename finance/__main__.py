@@ -5,8 +5,8 @@ import sys
 import logging
 import yaml
 
-from finance import Finance
-from finance import Options
+from finance.finance import Finance
+from finance.options import Options
 
 
 def main(args):
@@ -24,9 +24,12 @@ def main(args):
 
   try:
     finance = Finance(options)
+
+    finance.initialize()
     finance.run()
-  except Exception:
-    logging.error("Failure in finance.run()", exc_info=True)
+  except Exception as err:
+    logging.error(f"Failure in finance.run(), exception: {err}", exc_info=True)
+    raise err
 
 
 if __name__ == '__main__':

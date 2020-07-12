@@ -1,24 +1,13 @@
 
 
 from finance.finance.billinfo import BillInfo
-from finance.finance.loan import Loan
+from finance.finance.loan import Loan, create_loan
 from finance.finance.loaninfo import LoanInfo
+from finance.finance.money import Money
 import finance.finance.dataparser as parser
 
 import pytest
 import yaml
-
-# 'etc/finance_example.yaml'
-
-
-def test_no_loans_raise():
-  """Make sure that if loans key is not found an exception is raised"""
-  document = """
-    date: 07-09-2020
-  """
-
-  with pytest.raises(parser.ParserError):
-    loan_data = parser.parse(document)
 
 
 @pytest.fixture
@@ -34,12 +23,21 @@ def document():
         amount: 123.45
   """
 
-
-def test_dummy(document):
+def test_loan_with_defaults(document):
 
   loan_info = LoanInfo(10000.00, 3.45)
   bill_info = BillInfo(7, 123.45)
   expected_loan = Loan(loan_info, bill_info)
 
-  loan_data = parser.parse(document)
-  loans = parser.create_loans(loan_data)
+  data = parser.parse(document)
+  loan_data = parser.get_loans_data(data)
+  print(f'What: {loan_data}')
+  payers_data = parser.get_payers_data(data)
+ 
+  loan_list = create_loans(loan_data)
+
+  assert len(loan_list) == 1
+  assert loan_list[0].balance == Money(10000.00)
+  assert loan_list[0].interest == 3.45
+  assert loan_list[0].bill_day == 7
+  assert loan_list[0].min_payment == 123.45

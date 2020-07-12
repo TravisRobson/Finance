@@ -19,11 +19,15 @@ class LoanInfo:
     self._accruing = accruing
     self._start_date = start_date
 
-  def __str__(self):
-    return f"balance: {self._balance}, interest: {self._interest}, accruing: {self._accruing}"
-
   def __repr__(self):
-    return f"{repr(self._balance)}, {repr(self._interest)}, {repr(self._accruing)}"
+    msg = (
+      f"{self.__class__.__name__}("
+      f"balance: {self._balance}, "
+      f"interest: {self._interest}, "
+      f"accruing: {self._accruing}, "
+      f"start date: {self._start_date})"
+    )
+    return msg
 
   @property
   def balance(self):
