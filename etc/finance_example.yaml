@@ -1,17 +1,22 @@
 # This file will serve as the UI. If I were to make a proper application
 # this data would be fed in via a GUI and stored in a database.
 
-date modified: 06-23-2020     # The date the simulation should start from
-loans monthly payment: 500.00 # total amount user wishes to pay on loans total, monthly
+date modified: 06-23-2020 # The date the simulation should start from
+
+account:
+  name: checking account # a personal annotation
+  balance: 10000.00      # Cash in the account
 
 loans:
-  - name: Example Loan 1
+  - name: Example Loan 1 # a personal annotation
     loan info:
-      balance: 10000.00 # Balance left to be paid on loan
-      interest: 4.8     # APR (Annual Percentage Rate)
+      balance: 10000.00  # Balance left to be paid on loan
+      interest: 4.8      # APR (Annual Percentage Rate)
     bill info:
-      day: 7            # day of the month you receive the bill
-      amount: 123.45    # monthly bill amount  
+      day: 7             # day of the month you receive the bill
+      amount: 123.45     # monthly bill amount  
 
 payers:
-  - name: Example Payer 1
+  - name: Off period   # a personal annotation
+    frequency: monthly # options are monthly, one-week (weekly), two-week (biweekly), four-week
+    amount: 1000.00    # payment amount

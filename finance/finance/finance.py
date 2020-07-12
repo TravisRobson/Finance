@@ -68,6 +68,12 @@ class Finance:
       date_subject.register(InterestAccruer(l)) 
       date_subject.register(MinPaymentPayer(l, self._account))
 
+      if l.billing(date_subject.date):
+        pass
+
+      if l.accruing(date_subject.date):
+        pass
+
       # if not l.bill_in_progress:
       #   date_subject.register(StartBillingObserver(l))
 
