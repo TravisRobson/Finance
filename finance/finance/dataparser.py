@@ -37,3 +37,7 @@ def get_start_date(data):
 def get_account_data(data):
   """Currently singular"""
   return data.get('account', None)
+
+
+def get_payers_data(data):
+  return data.get('payers', None)

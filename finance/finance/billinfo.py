@@ -51,5 +51,6 @@ class BillInfo():
 
 def create_bill_info(data_dict):
   """From dataparser.py data dictionary create a BillInfo instance"""
-  return BillInfo(data_dict['day'], data_dict['amount'])
+  return BillInfo(data_dict['day'], data_dict['amount'], 
+    start_date=data_dict.get('start_date', None))
 

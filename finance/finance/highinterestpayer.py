@@ -2,10 +2,12 @@
 
 import datetime 
 
+from .dataparser import ParserError
 from .loan import Loan
 from .loanutils import sort_high_interest_first
 from .observer import Observer
 from .money import Money
+
 
 
 class HighestInterestFirstPayer(Observer):
@@ -22,6 +24,8 @@ class HighestInterestFirstPayer(Observer):
     self._loans = loans
     self._account = account
     self._day = day
+    if not isinstance(amount, Money):
+      amount = Money(amount)
     self._amount = amount
 
   def __str__(self):
@@ -80,4 +84,22 @@ class HighestInterestFirstPayer(Observer):
         self._update_loans(nonacrruing_loans, amount_left)
     
 
+def create_payers(data_dict, loans, account):
+  """
+  dataparser.py will parse the data file to create a dictionary of data 
+  which this function turns into a loan.
+  """
+  payers = []
+  for d in data_dict:
+    if 'amount' not in d:
+      raise ParserError('amount')
+    if 'start date' not in d:
+      raise ParserError('start date')
 
+    amount = d['amount']
+    # NEED TO DO SOME VALIDATION ON THE DAY
+    start_date = datetime.datetime.strptime(d['start date'], "%m-%d-%Y").date()
+
+    payers.append(HighestInterestFirstPayer(loans, account, start_date.day, amount))
+
+  return payers

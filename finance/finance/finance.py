@@ -7,7 +7,7 @@ import numpy as np
 
 from .account import Account
 from .datesubject import DateSubject
-from .highinterestpayer import HighestInterestFirstPayer
+from .highinterestpayer import HighestInterestFirstPayer, create_payers
 from .interestaccruer import InterestAccruer
 from .loanutils import total_owed_on_loans
 from .loanprocessor import LoanProcessor
@@ -29,9 +29,6 @@ class Finance:
 
   def __init__(self, options):
     self._options = options
-    self._today = datetime.date.today()
-    self._dates = [] # dates of the simulation
-    self._totals = np.array([]) # float balance for all loans
     self._loans = []
     self._counter = 0 # make sure we don't enter an infinte loop
 
@@ -45,7 +42,7 @@ class Finance:
       proc.start()
 
     print(f'Ending total balance {total_owed_on_loans(self._loans)}')
-    total_days = (dates[-1] - self._today).days
+    total_days = (dates[-1] - self._start_date).days
     print(f'Last day: {dates[-1]}, total days: {total_days}, i.e. ~{total_days / 365.:.2f} years')
     print(f'Amount paid: {self._init_amount - self._account.balance}')
 
@@ -63,22 +60,19 @@ class Finance:
     Create various observers of the date to synchonize billing and loan 
     interest accruing.
     """
+    for p in self._payers:
+      date_subject.register(p)
+
     for l in self._loans:
       # interest accrues before payment is made
       date_subject.register(InterestAccruer(l)) 
       date_subject.register(MinPaymentPayer(l, self._account))
 
       if l.billing(date_subject.date):
-        pass
+        date_subject.register(StartBillingObserver(l))
 
       if l.accruing(date_subject.date):
-        pass
-
-      # if not l.bill_in_progress:
-      #   date_subject.register(StartBillingObserver(l))
-
-      # if not l.accruing:
-      #   date_subject.register(StartAccruingObserver(l))
+        date_subject.register(StartAccruingObserver(l))
 
   def _read_loans_data(self, data):
     loan_data = parser.get_loans_data(data)
@@ -96,6 +90,10 @@ class Finance:
     self._init_amount = self._account.balance
     print(f'Initial account balance: {self._init_amount}')
 
+  def _read_payers_data(self, data):
+    payers_data = parser.get_payers_data(data)
+    self._payers = create_payers(payers_data, self._loans, self._account)
+
   def _read_data_file(self):
     with open('etc/finance.yaml') as file:
       data = parser.parse(file)
@@ -103,6 +101,7 @@ class Finance:
       self._read_loans_data(data)
       self._read_start_date_data(data)
       self._read_account_data(data)
+      self._read_payers_data(data)
 
   def initialize(self):
     self._read_data_file()
