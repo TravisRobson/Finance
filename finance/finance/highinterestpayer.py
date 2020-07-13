@@ -2,6 +2,7 @@
 
 import datetime 
 
+from .dataparser import ParserError
 from .loan import Loan
 from .loanutils import sort_high_interest_first
 from .observer import Observer
@@ -22,6 +23,8 @@ class HighestInterestFirstPayer(Observer):
     self._loans = loans
     self._account = account
     self._day = day
+    if not isinstance(amount, Money):
+      amount = Money(amount)
     self._amount = amount
 
   def __str__(self):
@@ -72,12 +75,30 @@ class HighestInterestFirstPayer(Observer):
     bill_date = self._get_bill_date(subject)
     if bill_date == subject.date:
       nonzero_loans = [l for l in self._loans if l.total_owed != Money()]
-      accruing_loans = [l for l in nonzero_loans if l.accruing]
+      accruing_loans = [l for l in nonzero_loans if l.accruing(subject.date)]
       amount_left = self._update_loans(accruing_loans, self._amount)
 
       if amount_left > Money(0.00):
-        nonacrruing_loans = [l for l in nonzero_loans if not l.accruing]
+        nonacrruing_loans = [l for l in nonzero_loans if not l.accruing(subject.date)]
         self._update_loans(nonacrruing_loans, amount_left)
     
 
+def create_payers(data_dict, loans, account):
+  """
+  dataparser.py will parse the data file to create a dictionary of data 
+  which this function turns into a loan.
+  """
+  payers = []
+  for d in data_dict:
+    if 'amount' not in d:
+      raise ParserError('amount')
+    if 'start date' not in d:
+      raise ParserError('start date')
 
+    amount = d['amount']
+    # NEED TO DO SOME VALIDATION ON THE DAY
+    start_date = datetime.datetime.strptime(d['start date'], "%m-%d-%Y").date()
+
+    payers.append(HighestInterestFirstPayer(loans, account, start_date.day, amount))
+
+  return payers

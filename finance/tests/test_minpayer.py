@@ -21,9 +21,9 @@ def current_date():
   return DateSubject(date)
 
 
-def create_loan(initial_amount, min_payment, in_progress=True):
+def create_loan(initial_amount, min_payment, bill_start_date=None):
   # create loan where minimum payment is the day after ptest fixture's date.
-  bill_info = BillInfo(day=5, amount=min_payment, in_progress=in_progress) 
+  bill_info = BillInfo(day=5, amount=min_payment, start_date=bill_start_date) 
   loan_info = LoanInfo(initial_amount, interest=1.00)
 
   return Loan(loan_info, bill_info)
@@ -35,7 +35,8 @@ def test_not_in_progress(current_date):
   not change account balance or total owed on loan.
   """
   initial_balance = Money(100.00)
-  loan = create_loan(initial_balance, Money(10.00), False)
+  bill_start_date = current_date.date + datetime.timedelta(days=100)
+  loan = create_loan(initial_balance, Money(10.00), bill_start_date)
 
   initial_amount = Money(1000.00)
   account = Account(initial_amount) # a reserve of money

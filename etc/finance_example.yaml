@@ -1,0 +1,26 @@
+# This file will serve as the UI. If I were to make a proper application
+# this data would be fed in via a GUI and stored in a database.
+
+date modified: 06-23-2020 # The date the simulation should start from
+
+account:
+  name: checking account # a personal annotation
+  balance: 10000.00      # Cash in the account
+
+loans:
+  - name: Example Loan 1 # a personal annotation
+    loan info:
+      balance: 10000.00  # Balance left to be paid on loan
+      interest: 4.8      # APR (Annual Percentage Rate)
+    bill info:
+      day: 7             # day of the month you receive the bill
+      amount: 123.45     # monthly bill amount  
+
+payers:
+  - name: Off period       # a personal annotation
+    frequency: monthly     # options are monthly, one-week (weekly), two-week 
+                           # (biweekly), four-week
+    amount: 100.00         # payment amount
+    start date: 06-01-2020 # First day to begin this payment scheme
+    account: account       # Account to take payment from. This would represent
+                           # the first relation in a relational database

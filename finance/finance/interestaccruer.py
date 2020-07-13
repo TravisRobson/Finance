@@ -17,7 +17,7 @@ class InterestAccruer:
 
   def update(self, subject):
     """Every day, daily interest is accrued."""
-    if self._loan.accruing and self._loan.total_owed:
+    if self._loan.accruing(subject.date) and self._loan.total_owed:
       self._loan.accrue_daily(subject.year)
 
       bill_date = self._get_bill_date(subject) 

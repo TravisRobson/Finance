@@ -182,10 +182,11 @@ def test_highest_interest_accruing(current_date):
   init_loans = []
   init_loan_balance = Money(100.00)
   bill_info = BillInfo(day=10, amount=Money(1.00)) # days after dates covered in this test
-  loan_info = LoanInfo(init_loan_balance, interest=1.00, accruing=False)  
+  accrue_start_date = current_date.date + datetime.timedelta(days=100)
+  loan_info = LoanInfo(init_loan_balance, 1.00, accrue_start_date)  
   init_loans.append(Loan(loan_info, bill_info))
 
-  loan_info = LoanInfo(init_loan_balance, interest=1.00)  
+  loan_info = LoanInfo(init_loan_balance, 1.00)  
   init_loans.append(Loan(loan_info, bill_info)) 
 
   loans = copy.deepcopy(init_loans)

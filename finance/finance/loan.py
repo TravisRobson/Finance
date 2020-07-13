@@ -1,25 +1,26 @@
-#!/usr/bin/env python3
+
 
 import calendar
 import decimal
 
+from .billinfo import BillInfo, create_bill_info
+from .exceptions import FinanceError
+from .loaninfo import LoanInfo, create_loan_info
+from .dataparser import ParserError
 from .money import Money
 
 
-class ExcessivePayment(Exception):
+class ExcessivePaymentError(FinanceError):
 
   def __init__(self, balance, accrued, amount):
+    msg = (
+      f"Excessive payment of {amount} on loan with balance {balance} and "
+      f"accrued interest {accrued}"
+    )
+    super(ExcessivePaymentError, self).__init__(msg)
     self._balance = balance
     self._accrued = accrued
     self._amount = amount
-
-  def __str__(self):
-    msg = (
-      f"Amounted to pay {self._amount} on loan "
-      f"with balance {self._balance}, "
-      f"and accrued interest {self._accrued}"
-    )
-    return msg
 
 
 class Loan: 
@@ -34,14 +35,15 @@ class Loan:
 
   def __str__(self):
     msg = (
-      f"loan info: {self._loan_info}, "
-      f"accrued interest: {self._accrued_interest}, "
-      f"bill info: {self._bill_info}, "
+      f"{self.__class__.__name__}("
+      f"loan_info={self._loan_info}, "
+      f"bill_info={self._bill_info}, "
+      f"accrued_interest={self._accrued_interest})"
     )
     return msg
  
   def __repr__(self):
-    return f"{repr(self._loan_info)}, {repr(self._bill_info)}, {repr(self._accrued_interest)}"
+    return str(self)
 
   @property
   def balance(self):
@@ -75,13 +77,8 @@ class Loan:
   def accrued_interest(self):
     return self._accrued_interest
   
-  @property
-  def bill_in_progress(self):
-    return self._bill_info.in_progress
-
-  @bill_in_progress.setter
-  def bill_in_progress(self, val):
-    self._bill_info.in_progress = val
+  def billing(self, date):
+    return self._bill_info.billing(date)
   
   @property
   def bill_start_date(self):
@@ -108,7 +105,7 @@ class Loan:
     than what is owed.
     """
     if amount > self.total_owed:
-      raise ExcessivePayment(self.balance, self.accrued_interest, amount)
+      raise ExcessivePaymentError(self.balance, self.accrued_interest, amount)
 
     leftover = self._apply_to_accrued(amount) # you must pay on accrued interest first
 
@@ -130,3 +127,24 @@ class Loan:
     self._loan_info.balance += self._accrued_interest
     self._loan_info.balance = round(self._loan_info.balance)
     self._accrued_interest = Money(0.00)
+
+
+def create_loans(data_dict):
+  """
+  dataparser.py will parse the data file to create a dictionary of data 
+  which this function turns into a loan.
+  """
+  loans = []
+  for d in data_dict:
+    if 'loan info' not in d:
+      raise ParserError('loan info')
+    if 'bill info' not in d:
+      raise ParserError('bill info')
+
+    loan_info_data = d['loan info']
+    bill_info_data = d['bill info']
+
+    loans.append(Loan(create_loan_info(loan_info_data), create_bill_info(bill_info_data)))
+
+  return loans
+

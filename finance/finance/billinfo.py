@@ -1,15 +1,17 @@
 
 
-import enum
-
+from .dataparser import ParserError
 from .exceptions import InvalidBillDayOfMonth
 from .money import Money
 
 
 class BillInfo():
   """Data about billing on a loan"""
-  def __init__(self, day, amount, in_progress=True, start_date=None):
-    """Validate args and set member variables"""
+  def __init__(self, day, amount, start_date=None):
+    """
+    If there is no start date provided the loan is assume to already be 
+    billing the borrower.
+    """
     if not InvalidBillDayOfMonth.is_valid(day):
       raise InvalidBillDayOfMonth
 
@@ -18,23 +20,23 @@ class BillInfo():
 
     self._day = int(day) # day the minimum payment is due
     self._amount = amount # min payment of a loan
-    self._in_progress = in_progress # Is the bill being collected or is loan in deferrment?
     self._start_date = start_date
 
-  def __str__(self):
-    return f"Bill day: {self._day}, amount: {self._amount}, in progress: {self._in_progress}"
-
   def __repr__(self):
-    return f"{repr(self._day)}, {repr(self._amount)}, {repr(self._in_progress)}"
+    msg = (
+      f"{self.__class__.__name__}("
+      f"day={self._day}, "
+      f"amount={self._amount}, "
+      f"start_date={self._start_date})"
+    )
+    return msg 
 
-  @property
-  def in_progress(self):
-    return self._in_progress
+  def billing(self, date):
+    result = True
+    if self._start_date:
+      result = date >= self._start_date
+    return result
 
-  @in_progress.setter
-  def in_progress(self, val):
-    self._in_progress = val
-  
   @property
   def amount(self):
     return self._amount
@@ -46,4 +48,15 @@ class BillInfo():
   @property
   def start_date(self):
     return self._start_date
+
+
+def create_bill_info(data_dict):
+  """From dataparser.py data dictionary create a BillInfo instance"""
+  if 'day' not in data_dict:
+    raise ParserError('day')
+  if 'amount' not in data_dict:
+    raise ParserError('amount')
+    
+  return BillInfo(data_dict['day'], data_dict['amount'], 
+    start_date=data_dict.get('start_date', None))
 

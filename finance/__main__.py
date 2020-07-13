@@ -2,10 +2,11 @@
 
 
 import sys
-from logging import basicConfig, getLogger, DEBUG
+import logging
+import yaml
 
-from finance import Finance
-from finance import Options
+from finance.finance import Finance
+from finance.options import Options
 
 
 def main(args):
@@ -14,16 +15,21 @@ def main(args):
   """
   print('Welcome to Finance')
 
-  logger = getLogger(__name__)
+  logger = logging.getLogger(__name__)
 
   options = Options()
   options.parse(args[1:])
 
-  basicConfig(filename='finance.log', level=DEBUG)
+  logging.basicConfig(filename='finance.log', level=logging.DEBUG)
 
-  finance = Finance(options)
+  try:
+    finance = Finance(options)
 
-  finance.run()
+    finance.initialize()
+    finance.run()
+  except Exception as err:
+    logging.error(f"Failure in finance.run(), exception: {err}", exc_info=True)
+    raise err
 
 
 if __name__ == '__main__':

@@ -1,11 +1,12 @@
 
 
+from .dataparser import ParserError
 from .money import Money
 
 
 class LoanInfo:
 
-  def __init__(self, balance, interest, accruing=True, start_date=None):
+  def __init__(self, balance, interest, start_date=None):
     """
     Interest rate is APR, assumed to be a percentage.
     """
@@ -16,14 +17,16 @@ class LoanInfo:
 
     self._balance = round(balance, 2) # Ensure balance is rounded to pennies.
     self._interest = interest
-    self._accruing = accruing
     self._start_date = start_date
 
-  def __str__(self):
-    return f"balance: {self._balance}, interest: {self._interest}, accruing: {self._accruing}"
-
   def __repr__(self):
-    return f"{repr(self._balance)}, {repr(self._interest)}, {repr(self._accruing)}"
+    msg = (
+      f"{self.__class__.__name__}("
+      f"balance={self._balance}, "
+      f"interest={self._interest}, "
+      f"start date={self._start_date})"
+    )
+    return msg
 
   @property
   def balance(self):
@@ -36,18 +39,32 @@ class LoanInfo:
   @property
   def interest(self):
     return self._interest
-  
-  @property
-  def accruing(self):
-    return self._accruing
-
-  @accruing.setter
-  def accruing(self, val):
-    self._accruing = val
 
   @property
   def start_date(self):
     return self._start_date
+
+  def accruing(self, date):
+    result = True # default state
+    if self._start_date:
+      result = date >= self._start_date
+    return result
+
+
+def call_with_non_none_args(func, *args, **kwargs):
+  kwargs_not_none = {k: v for k, v in kwargs.items() if v is not None}
+  return func(*args, **kwargs_not_none)
+
+
+def create_loan_info(data_dict):
+  """From dataparser.py data dictionary create a LoanInfo instance"""
+  if 'balance' not in data_dict:
+    raise ParserError('balance')
+  if 'interest' not in data_dict:
+    raise ParserError('interest')
+
+  return call_with_non_none_args(LoanInfo,
+    balance=data_dict['balance'], interest=data_dict['interest'], start_date=data_dict.get('start_date', None))
   
   
   
