@@ -1,8 +1,0 @@
-0.1 -- beta
-    [#1] -- Initial unit test created.
-    [#2] -- Fundamental money class
-    [#4] -- Loan class, simple daily interest
-    [#8] -- HightestInterestPayer to pay down loans
-    [#12] -- For loans that aren't billing and/or collecting interest there
-             can now be a date in the future where billing starts and a 
-             potentially different date for when interest starts accruing.
