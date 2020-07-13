@@ -9,7 +9,6 @@ from .observer import Observer
 from .money import Money
 
 
-
 class HighestInterestFirstPayer(Observer):
   """
   A loan list observer.

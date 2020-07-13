@@ -1,7 +1,8 @@
 
 
-from .money import Money
 from .exceptions import FinanceError
+from .dataparser import ParserError
+from .money import Money
 
 
 class InsufficientFundsError(FinanceError):
