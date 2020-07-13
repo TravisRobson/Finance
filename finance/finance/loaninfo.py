@@ -1,5 +1,6 @@
 
 
+from .dataparser import ParserError
 from .money import Money
 
 

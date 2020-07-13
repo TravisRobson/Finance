@@ -1,5 +1,6 @@
 
 
+from .dataparser import ParserError
 from .exceptions import InvalidBillDayOfMonth
 from .money import Money
 
@@ -51,6 +52,11 @@ class BillInfo():
 
 def create_bill_info(data_dict):
   """From dataparser.py data dictionary create a BillInfo instance"""
+  if 'day' not in data_dict:
+    raise ParserError('day')
+  if 'amount' not in data_dict:
+    raise ParserError('amount')
+    
   return BillInfo(data_dict['day'], data_dict['amount'], 
     start_date=data_dict.get('start_date', None))
 
